@@ -7,4 +7,7 @@ urlpatterns = [
     path('api/chat/', ChatAPI.as_view(), name='chat_api'),
     path('api/chat/delete/<int:session_id>/', ChatDeleteAPI.as_view(), name='chat_delete_api'),
     path('api/download_from_qr/', download_from_qr, name='download_from_qr'),
+path("api/pdf-preview/", PDFPreviewView.as_view(), name="pdf_preview"),
+
 ]
+

@@ -14,7 +14,11 @@ from django.core.exceptions import PermissionDenied
 
 from google.generativeai import GenerativeModel, configure
 from .models import ChatSession, ChatMessage
-from .constants import SYSTEM_PROMPT, API_KEY
+from .constants import DEFAULT_PDF_MIME_TYPE, SYSTEM_PROMPT, API_KEY, get_default_pdf_base64
+import re
+from .constants import get_default_pdf_base64, DEFAULT_PDF_MIME_TYPE
+
+DEFAULT_PDF_B64 = get_default_pdf_base64()
 
 
 
@@ -43,6 +47,23 @@ class ChatView(TemplateView):
         context['chat_sessions'] = ChatSession.objects.filter(user=user).order_by('-updated_at')
         return context
 
+def clean_text_for_tts(text: str) -> str:
+    """Remove markdown formatting for TTS output."""
+    if not text:
+        return text
+    # Remove **bold** and __underline__
+    text = re.sub(r"[\*\*_]{2}(.*?)\1{2}", r"\1", text)
+    # Remove *italics* and _italics_
+    text = re.sub(r"[\*_](.*?)\1", r"\1", text)
+    # Remove markdown headings (#, ##, etc.)
+    text = re.sub(r"^#+ (.*?)$", r"\1", text, flags=re.MULTILINE)
+    # Remove markdown links [text](url)
+    text = re.sub(r"\[(.*?)\]\(.*?\)", r"\1", text)
+    # Remove inline code `code`
+    text = re.sub(r"`(.*?)`", r"\1", text)
+    # Clean extra spaces and newlines
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
 
 @method_decorator(csrf_exempt, name='dispatch')
 class ChatAPI(APIView):
@@ -52,12 +73,38 @@ class ChatAPI(APIView):
             session_id = request.data.get('session_id')
             input_text = request.data.get('message', '').strip()
             file_data = request.data.get('file')
+            language = request.data.get('language', 'en-US')  # Default to English
 
+            # === 1. Validate language ===
+            if language not in ['en-US', 'hi-IN', 'ja-JP', 'ko-KR']:
+
+                return Response({"error": "Unsupported language."}, status=400)
+
+            # === 2. System instruction based on language ===
+            if language == "ja-JP":
+                lang_name = "Japanese (日本語)"
+                language_instruction = "You must ALWAYS respond ONLY in Japanese (日本語). Never use English. Keep answers concise and natural."
+            elif language == "hi-IN":
+                lang_name = "Hindi (हिंदी)"
+                language_instruction = "You must ALWAYS respond ONLY in Hindi (हिंदी). Never use English. Keep answers concise and natural."
+            elif language == "ko-KR":
+                lang_name = "Korean (한국어)"
+                language_instruction = "You must ALWAYS respond ONLY in Korean (한국어). Never use English. Keep answers concise and natural."    
+            else:
+                lang_name = "English"
+                language_instruction = "You must ALWAYS respond ONLY in English. Never use any other language. Keep answers concise and natural."
+
+            # === 3. Get or create session ===
+            # === 3. Get or create session ===
             if session_id:
                 session = get_object_or_404(ChatSession, id=session_id, user=user)
+                is_new_session = not session.messages.exists()
             else:
                 session = ChatSession.objects.create(user=user, title="New Chat")
+                is_new_session = True
 
+            # === 4. Save user message ===
+            # === 4. Save user message ===
             if input_text or file_data:
                 msg = ChatMessage.objects.create(
                     session=session,
@@ -69,51 +116,88 @@ class ChatAPI(APIView):
                     msg.file_data = file_data['data']
                     msg.file_mime_type = file_data['mimeType']
                     msg.save()
+                elif is_new_session:
+                    # No file attached by user, but this is a new chat — auto-attach default PDF
+                    msg.file_data = get_default_pdf_base64()
+                    msg.file_mime_type = DEFAULT_PDF_MIME_TYPE
+                    msg.save()
+                    file_data = {
+                        "data": msg.file_data,
+                        "mimeType": msg.file_mime_type
+                    }
 
-            model = GenerativeModel(model_name="gemini-2.5-pro")
-            history = [{"role": "user", "parts": [{"text": SYSTEM_PROMPT}]}]
-            for m in session.messages.all().order_by('created_at'):
+            # === 5. Create model with system instruction ===
+            model = GenerativeModel(
+                model_name="gemini-2.5-flash",
+                system_instruction=f"{SYSTEM_PROMPT}\n\n{language_instruction}"
+            )
+
+            # Build history
+            history = []
+            for m in session.messages.all().order_by("created_at"):
                 role = "user" if m.is_user else "model"
                 parts = []
                 if m.text:
                     parts.append({"text": m.text})
                 if m.file_data:
-                    parts.append({"inline_data": {"mime_type": m.file_mime_type, "data": m.file_data}})
+                    parts.append({
+                        "inline_data": {
+                            "mime_type": m.file_mime_type,
+                            "data": m.file_data
+                        }
+                    })
                 if parts:
                     history.append({"role": role, "parts": parts})
 
             chat = model.start_chat(history=history)
 
+            # === 6. Force user input into correct language context ===
+            wrapped_input = (
+                f"The user is communicating in {lang_name}. "
+                f"Respond ONLY in {lang_name}, never switch to another language.\n\n"
+                f"{input_text}" if input_text else None
+            )
+
+            # === 7. Send new message ===
             if input_text:
-                result = chat.send_message(input_text)
+                result = chat.send_message(wrapped_input)
             elif file_data:
-                result = chat.send_message([{"inline_data": {"mime_type": file_data["mimeType"], "data": file_data["data"]}}])
+                result = chat.send_message([
+                    {"inline_data": {
+                        "mime_type": file_data["mimeType"],
+                        "data": file_data["data"]
+                    }},
+                    {"text": f"Respond ONLY in {lang_name}, never switch language."}
+                ])
             else:
                 return Response({"error": "No input provided."}, status=400)
 
+            # === 8. Save model reply ===
             ChatMessage.objects.create(session=session, is_user=False, text=result.text)
 
-            # === Generate short title via second model call ===
-            if session.title == "New Chat" and input_text and result.text:
-                try:
-                    title_prompt = (
-                        "Summarize the following conversation in 3 to 5 words, "
-                        "suitable as a chat title. Only return the title, no extra text.\n\n"
-                        f"User: {input_text}\nAssistant: {result.text}"
-                    )
-                    title_resp = model.generate_content(title_prompt)
-                    short_title = title_resp.text.strip().split("\n")[0][:50]
-                    if short_title:
-                        session.title = short_title
-                        session.save()
-                except Exception:
-                    print("Title generation error:", traceback.format_exc())
+            # === 9. Generate title ===
+            if session.title == "New Chat" and input_text:
+                words = input_text.split()
+                short_title = " ".join(words[:6])  # first 6 words
+                session.title = short_title[:50]   # max 50 chars
+                session.save()
 
-            return Response({"response": result.text, "session_id": session.id, "success": True})
+            # === 10. TTS clean output ===
+            tts_text = clean_text_for_tts(result.text)
+
+            return Response({
+                "response": result.text,
+                "tts_response": tts_text,
+                "session_id": session.id,
+                "success": True
+            })
 
         except Exception:
             print("Unexpected error:", traceback.format_exc())
-            return Response({"error": "Something went wrong. Please try again later.", "success": False}, status=500)
+            return Response(
+                {"error": "Something went wrong. Please try again later.", "success": False},
+                status=500
+            )
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -129,7 +213,6 @@ class ChatDeleteAPI(APIView):
         except Exception:
             print("Delete error:", traceback.format_exc())
             return Response({"success": False, "error": "Something went wrong. Please try again later."}, status=500)
-
 
 @csrf_exempt
 def download_from_qr(request):
@@ -150,3 +233,29 @@ def download_from_qr(request):
     except Exception:
         print("QR Download error:", traceback.format_exc())
         return JsonResponse({"error": "Something went wrong. Please try again later."}, status=500)
+    
+    
+
+import os
+from django.conf import settings
+from django.http import FileResponse, Http404
+from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
+
+
+class PDFPreviewView(APIView):
+    """
+    Serves chatbot/assets/SERVO_PANEL.pdf so it can be
+    opened/rendered inline in a new browser tab.
+    """
+    permission_classes = [AllowAny]  # tighten later if needed
+
+    def get(self, request):
+        pdf_path = os.path.join(settings.BASE_DIR, "chatbot", "assets", "SERVO_PANEL.pdf")
+
+        if not os.path.exists(pdf_path):
+            raise Http404("PDF not found.")
+
+        response = FileResponse(open(pdf_path, "rb"), content_type="application/pdf")
+        response["Content-Disposition"] = 'inline; filename="SERVO_PANEL.pdf"'
+        return response

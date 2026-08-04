@@ -24,7 +24,7 @@ SECRET_KEY = "django-insecure-#brl)51%*1!t$(c0_#=s27_p%2*@m5h#_)-jozy_g=6qek!&(a
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["AiDemoPro.pythonanywhere.com","127.0.0.1","*","localhost","192.168.1.3"]
 
 
 # Application definition
@@ -116,7 +116,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = '/static/'
+# STATICFILES_DIRS = [
+#     BASE_DIR / "chatbot/static",
+#     BASE_DIR / "staticfiles",
+# ]
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
