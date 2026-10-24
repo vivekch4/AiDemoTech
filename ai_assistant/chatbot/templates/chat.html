@@ -3,36 +3,48 @@
 <head>
     <meta charset="UTF-8">
     {% load static %}
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari&family=Noto+Sans+JP&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>MaintenanceMateAI Assistant</title>
+
+    <!-- Apply the saved / system theme before anything paints (no white flash) -->
+    <script>
+        (function () {
+            var saved = null;
+            try { saved = localStorage.getItem('darkMode'); } catch (e) {}
+            var dark = saved === null
+                ? window.matchMedia('(prefers-color-scheme: dark)').matches
+                : saved === 'true';
+            if (dark) document.documentElement.classList.add('dark');
+        })();
+    </script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600&family=Noto+Sans+JP:wght@400;600&family=Noto+Sans+KR:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans Devanagari', 'Noto Sans JP', 'Noto Sans KR', 'system-ui', 'sans-serif'],
+                    },
                     colors: {
                         'parihar': {
                             50: '#f0f9ff',
                             100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
                             500: '#0ea5e9',
                             600: '#0284c7',
                             700: '#0369a1',
                             800: '#075985',
                             900: '#0c4a6e',
-                            150: '#27e31750',
-                        }
-                    },
-                    animation: {
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'bounce-gentle': 'bounce 2s infinite',
-                        'gradient': 'gradient 8s ease infinite',
-                    },
-                    keyframes: {
-                        gradient: {
-                            '0%, 100%': { 'background-position': '0% 50%' },
-                            '50%': { 'background-position': '100% 50%' }
                         }
                     }
                 }
@@ -40,397 +52,627 @@
         }
     </script>
     <style>
-        .w-10 {
-            width: 2.5rem !important;
+        :root {
+            --accent: #0ea5e9;
+            --accent-strong: #0284c7;
+            --accent-soft: rgba(14, 165, 233, 0.12);
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+            --text: #0f172a;
+            --muted: #64748b;
+            --faint: #94a3b8;
+            --line: rgba(15, 23, 42, 0.08);
+            --glass: rgba(255, 255, 255, 0.72);
+            --shadow-soft: 0 1px 2px rgba(15, 23, 42, 0.04), 0 10px 30px -14px rgba(15, 23, 42, 0.18);
         }
-        
-        .gradient-bg {
-            background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c);
-            background-size: 400% 400%;
-            animation: gradient 15s ease infinite;
-        }
-        .glass-morphism {
-            background: rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-        }
-        .chat-scroll {
-            scrollbar-width: thin;
-            scrollbar-color: #cbd5e1 transparent;
-        }
-        .chat-scroll::-webkit-scrollbar {
-            width: 6px;
-        }
-        .chat-scroll::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .chat-scroll::-webkit-scrollbar-thumb {
-            background-color: #cbd5e1;
-            border-radius: 3px;
-        }
-        .chat-scroll::-webkit-scrollbar-thumb:hover {
-            background-color: #94a3b8;
-        }
-        @keyframes typing {
-            0%, 20% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-            80%, 100% { transform: scale(1); }
-        }
-        .typing-dot {
-            animation: typing 1.4s infinite;
-        }
-        .typing-dot:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-        .typing-dot:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-        .message-slide-in {
-            animation: slideIn 0.3s ease-out;
-        }
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        .logo-glow {
-            filter: drop-shadow(0 0 20px rgba(14, 165, 233, 0.5));
-        }
-        .imgg {
-            width: 100px;
-        }
-        .logo-light {
-            display: block;
-        }
-        .logo-dark {
-            display: none;
-        }
-        .dark .logo-light {
-            display: none;
-        }
-        .dark .logo-dark {
-            display: block;
-        }
-        .language-dropdown {
-            min-width: 120px;
-        }
-        
-        /* Responsive Adjustments */
-        @media (max-width: 1024px) {
-            #sidebar {
-                width: 70%;
-                max-width: 250px;
-            }
-            .chat-item {
-                padding: 2px;
-            }
-            #messages-container {
-                padding: 2px;
-            }
-            .max-w-4xl {
-                max-width: 100%;
-            }
-            #text-input {
-                padding: 8px;
-                font-size: 14px;
-            }
-            #send-button {
-                width: 8%;
-                height: 40px;
-            }
-            .flex-1 {
-                flex: 1 0 0%;
-            }
+        .dark {
+            --accent: #38bdf8;
+            --accent-strong: #0ea5e9;
+            --accent-soft: rgba(56, 189, 248, 0.12);
+            --surface: #131c2e;
+            --surface-2: #0f1727;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --faint: #64748b;
+            --line: rgba(255, 255, 255, 0.07);
+            --glass: rgba(13, 20, 35, 0.66);
+            --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px -14px rgba(0, 0, 0, 0.6);
         }
 
-        @media (max-width: 640px) {
-            .sidesade {
-                position: relative;
-                left: 70px;
-            }
-            #sidebar {
-                width: 80%;
-                max-width: 200px;
-            }
-            #mobile-menu-button {
-                top: 10px;
-                left: 10px;
-            }
-            #text-input {
-                padding: 6px;
-                font-size: 12px;
-            }
-            #send-button {
-                width: 10%;
-                height: 35px;
-            }
-            .chat-item h3 {
-                font-size: 12px;
-            }
-            .chat-item .flex.items-center {
-                font-size: 10px;
-            }
-            .language-dropdown {
-                min-width: 100px;
-            }
+        body {
+            background: #f4f7fb;
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+        }
+        .dark body { background: #0a1020; }
+
+        /* Smooth day/night switch */
+        html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *::after {
+            transition: background-color .4s ease, border-color .4s ease, color .4s ease, box-shadow .4s ease !important;
+        }
+
+        /* Soft background glow */
+        .bg-aurora {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+        }
+        .bg-aurora::before, .bg-aurora::after {
+            content: ''; position: absolute; border-radius: 50%; filter: blur(90px); opacity: .55;
+        }
+        .bg-aurora::before {
+            width: 520px; height: 520px; top: -160px; right: -120px;
+            background: radial-gradient(circle, rgba(14,165,233,.35), transparent 70%);
+            animation: drift 18s ease-in-out infinite alternate;
+        }
+        .bg-aurora::after {
+            width: 460px; height: 460px; bottom: -180px; left: 20%;
+            background: radial-gradient(circle, rgba(56,189,248,.22), transparent 70%);
+            animation: drift 22s ease-in-out infinite alternate-reverse;
+        }
+        .dark .bg-aurora::before { opacity: .35; }
+        .dark .bg-aurora::after { opacity: .3; }
+        @keyframes drift {
+            from { transform: translate(0, 0) scale(1); }
+            to { transform: translate(-40px, 30px) scale(1.08); }
+        }
+
+        .glass {
+            background: var(--glass);
+            backdrop-filter: blur(18px) saturate(150%);
+            -webkit-backdrop-filter: blur(18px) saturate(150%);
+        }
+        .hairline { border-color: var(--line); }
+
+        /* Scrollbars */
+        .chat-scroll { scrollbar-width: thin; scrollbar-color: rgba(148,163,184,.45) transparent; }
+        .chat-scroll::-webkit-scrollbar { width: 6px; }
+        .chat-scroll::-webkit-scrollbar-thumb { background: rgba(148,163,184,.45); border-radius: 3px; }
+        .chat-scroll::-webkit-scrollbar-track { background: transparent; }
+
+        /* Logos */
+        .imgg { width: 100px; }
+
+        /* ---------- Sidebar ---------- */
+        .new-chat-btn {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            box-shadow: 0 10px 24px -10px rgba(2, 132, 199, .7);
+            transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+        }
+        .new-chat-btn:hover { transform: translateY(-1px); box-shadow: 0 14px 28px -10px rgba(2, 132, 199, .8); filter: brightness(1.05); }
+        .new-chat-btn:active { transform: translateY(0) scale(.98); }
+
+        .search-box {
+            background: var(--surface-2); border: 1px solid var(--line); color: var(--text);
+        }
+        .search-box:focus { outline: none; border-color: rgba(14,165,233,.5); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+        .chat-group-label {
+            font-size: .68rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+            color: var(--faint); padding: .9rem .75rem .35rem;
+        }
+        .chat-item {
+            position: relative; display: flex; align-items: center; gap: .65rem;
+            padding: .6rem .7rem; border-radius: .85rem; cursor: pointer;
+            transition: background-color .2s ease, transform .3s ease, opacity .3s ease;
+        }
+        .chat-item.hidden, .chat-group-label.hidden { display: none; }
+        .chat-item:hover { background: rgba(15, 23, 42, .045); }
+        .dark .chat-item:hover { background: rgba(255, 255, 255, .05); }
+        .chat-item .chat-icon {
+            width: 2rem; height: 2rem; border-radius: .65rem; flex-shrink: 0;
+            display: grid; place-items: center; font-size: .8rem;
+            color: var(--muted); background: var(--surface-2); border: 1px solid var(--line);
+        }
+        .chat-item.is-active { background: var(--accent-soft); }
+        .chat-item.is-active::before {
+            content: ''; position: absolute; left: 0; top: 22%; bottom: 22%; width: 3px;
+            border-radius: 0 3px 3px 0; background: var(--accent);
+        }
+        .chat-item.is-active .chat-icon { color: #fff; background: linear-gradient(135deg, #0ea5e9, #0284c7); border-color: transparent; }
+        .chat-item .chat-title { color: var(--text); }
+        .chat-item .chat-time { color: var(--faint); }
+        .delete-chat-button {
+            opacity: 0; color: var(--faint); border-radius: .55rem; padding: .35rem .45rem;
+            transition: opacity .2s ease, color .2s ease, background-color .2s ease;
+        }
+        .chat-item:hover .delete-chat-button { opacity: 1; }
+        .delete-chat-button:hover { color: #ef4444; background: rgba(239, 68, 68, .1); }
+        @media (hover: none) { .delete-chat-button { opacity: .7; } }
+
+        .status-dot { position: relative; width: .5rem; height: .5rem; border-radius: 50%; background: #22c55e; }
+        .status-dot::after {
+            content: ''; position: absolute; inset: 0; border-radius: 50%; background: #22c55e;
+            animation: ping 1.8s cubic-bezier(0, 0, .2, 1) infinite;
+        }
+        @keyframes ping { 75%, 100% { transform: scale(2.4); opacity: 0; } }
+
+        /* ---------- Header ---------- */
+        .hdr-btn {
+            width: 2.35rem; height: 2.35rem; border-radius: .75rem; display: grid; place-items: center;
+            color: var(--muted); transition: color .2s ease, background-color .2s ease, transform .2s ease;
+        }
+        .hdr-btn:hover { color: var(--accent); background: var(--accent-soft); }
+        .hdr-btn:active { transform: scale(.94); }
+        .hdr-btn.is-on { color: var(--accent); background: var(--accent-soft); }
+
+        .lang-select {
+            appearance: none; -webkit-appearance: none;
+            background: var(--surface-2); border: 1px solid var(--line); color: var(--text);
+            border-radius: .75rem; padding: .45rem 2rem .45rem .75rem; font-size: .82rem; font-weight: 500;
+            cursor: pointer; transition: border-color .2s ease, box-shadow .2s ease;
+        }
+        .lang-select:focus { outline: none; border-color: rgba(14,165,233,.5); box-shadow: 0 0 0 3px var(--accent-soft); }
+        .lang-wrap { position: relative; }
+        @media (max-width: 639px) {
+            .lang-select { padding: .45rem 1.6rem .45rem .6rem; }
+            .lang-wrap::after { right: .6rem; }
+            .hdr-btn { width: 2.1rem; }
+        }
+        .lang-wrap::after {
+            content: '\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900; font-size: .6rem;
+            position: absolute; right: .8rem; top: 50%; transform: translateY(-50%); color: var(--faint); pointer-events: none;
+        }
+
+        /* Day / night toggle */
+        .theme-toggle { position: relative; overflow: hidden; }
+        .theme-toggle i { position: absolute; transition: transform .5s cubic-bezier(.4, 1.6, .5, 1), opacity .3s ease; }
+        .theme-toggle .fa-moon { transform: rotate(0) scale(1); opacity: 1; }
+        .theme-toggle .fa-sun { transform: rotate(-90deg) scale(.4); opacity: 0; color: #f59e0b; }
+        .dark .theme-toggle .fa-moon { transform: rotate(90deg) scale(.4); opacity: 0; }
+        .dark .theme-toggle .fa-sun { transform: rotate(0) scale(1); opacity: 1; }
+
+        /* ---------- Messages ---------- */
+        .msg { display: flex; gap: .75rem; animation: msgIn .45s cubic-bezier(.2, .8, .2, 1) both; }
+        .msg + .msg { margin-top: 1.4rem; }
+        .msg-user { justify-content: flex-end; }
+        .msg-body { display: flex; flex-direction: column; min-width: 0; max-width: min(46rem, 86%); }
+        .msg-ai .msg-body { flex: 1; }
+        .msg-user .msg-body { align-items: flex-end; }
+        @keyframes msgIn {
+            from { opacity: 0; transform: translateY(14px) scale(.985); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .msg-meta { display: flex; align-items: center; gap: .5rem; font-size: .72rem; color: var(--faint); margin: 0 .2rem .35rem; }
+        .msg-user .msg-meta { margin: .35rem .2rem 0; }
+        .msg-name { font-weight: 600; color: var(--muted); }
+
+        .avatar-ai {
+            position: relative; width: 2.1rem; height: 2.1rem; border-radius: .75rem; flex-shrink: 0;
+            display: grid; place-items: center; background: var(--surface); border: 1px solid var(--line);
+            box-shadow: var(--shadow-soft);
+        }
+        .avatar-ai img { width: 1.4rem; height: 1.4rem; object-fit: contain; }
+
+        .bubble-user {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7); color: #fff;
+            padding: .7rem 1rem; border-radius: 1.2rem 1.2rem .4rem 1.2rem;
+            box-shadow: 0 10px 26px -12px rgba(2, 132, 199, .7);
+            font-size: .925rem; line-height: 1.6; overflow-wrap: anywhere;
+        }
+        .user-text { white-space: pre-wrap; }
+        .bubble-ai {
+            background: var(--surface); border: 1px solid var(--line); color: var(--text);
+            padding: .85rem 1.1rem; border-radius: .4rem 1.2rem 1.2rem 1.2rem;
+            box-shadow: var(--shadow-soft); font-size: .925rem; line-height: 1.7; overflow-wrap: anywhere;
+        }
+        .bubble-img { margin-top: .5rem; border-radius: .8rem; max-width: 100%; max-height: 320px; }
+        .file-chip {
+            display: flex; align-items: center; gap: .6rem; margin-top: .45rem; padding: .5rem .7rem;
+            border-radius: .8rem; background: rgba(255, 255, 255, .16); border: 1px solid rgba(255, 255, 255, .22);
+        }
+        .file-chip:first-child { margin-top: 0; }
+        .file-chip .file-icon { width: 2rem; height: 2rem; border-radius: .6rem; display: grid; place-items: center; background: rgba(255, 255, 255, .2); }
+        .file-chip .file-name { font-size: .8rem; font-weight: 600; line-height: 1.2; }
+        .file-chip .file-sub { font-size: .7rem; opacity: .8; }
+
+        .msg-actions { display: flex; gap: .2rem; margin-top: .4rem; opacity: 0; transition: opacity .25s ease; }
+        .msg:hover .msg-actions, .msg-actions.show, .msg:last-child .msg-actions { opacity: 1; }
+        @media (hover: none) { .msg-actions { opacity: 1; } }
+        .act-btn {
+            display: inline-flex; align-items: center; gap: .35rem; font-size: .74rem; font-weight: 500;
+            padding: .3rem .55rem; border-radius: .55rem; color: var(--faint);
+            transition: color .2s ease, background-color .2s ease;
+        }
+        .act-btn:hover { color: var(--accent); background: var(--accent-soft); }
+        .act-btn.is-on { color: var(--accent); }
+
+        /* Markdown inside AI replies */
+        .md > :first-child { margin-top: 0; }
+        .md > :last-child { margin-bottom: 0; }
+        .md p { margin: .55em 0; }
+        .md strong { font-weight: 650; color: var(--text); }
+        .md em { font-style: italic; }
+        .md ul, .md ol { margin: .55em 0; padding-left: 1.3rem; }
+        .md ul { list-style: disc; }
+        .md ol { list-style: decimal; }
+        .md li { margin: .25em 0; padding-left: .15rem; }
+        .md li::marker { color: var(--accent); font-weight: 600; }
+        .md h1, .md h2, .md h3, .md h4 { font-weight: 650; line-height: 1.35; margin: 1em 0 .45em; }
+        .md h1 { font-size: 1.2rem; } .md h2 { font-size: 1.1rem; } .md h3, .md h4 { font-size: 1rem; }
+        .md a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+        .md code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .84em;
+            background: var(--accent-soft); color: var(--accent-strong); padding: .1em .38em; border-radius: .35rem;
+        }
+        .dark .md code { color: #7dd3fc; }
+        .md pre {
+            margin: .7em 0; padding: .85rem 1rem; border-radius: .8rem; overflow-x: auto;
+            background: #0b1222; color: #e2e8f0; border: 1px solid rgba(255, 255, 255, .06);
+        }
+        .md pre code { background: none; color: inherit; padding: 0; font-size: .82rem; }
+        .md blockquote { margin: .6em 0; padding: .2em .9em; border-left: 3px solid var(--accent); color: var(--muted); }
+        .md hr { border: 0; border-top: 1px solid var(--line); margin: 1em 0; }
+        .md table { width: 100%; border-collapse: collapse; margin: .7em 0; font-size: .85rem; display: block; overflow-x: auto; }
+        .md th, .md td { border: 1px solid var(--line); padding: .4rem .6rem; text-align: left; }
+        .md th { background: var(--surface-2); font-weight: 600; }
+        .md[data-render-md] { white-space: pre-wrap; }
+
+        /* Typing effect caret */
+        .type-caret {
+            display: inline-block; width: .45em; height: 1.05em; margin-left: 3px;
+            vertical-align: -.15em; border-radius: 2px; background: var(--accent);
+            animation: caret 1s steps(2, start) infinite;
+        }
+        @keyframes caret { to { visibility: hidden; } }
+
+        /* ---------- Thinking animation ---------- */
+        .orb::before, .orb::after {
+            content: ''; position: absolute; inset: -1px; border-radius: inherit;
+            border: 2px solid var(--accent); opacity: 0; animation: orbRing 2s cubic-bezier(.2, .6, .4, 1) infinite;
+        }
+        .orb::after { animation-delay: 1s; }
+        .orb { animation: orbGlow 2s ease-in-out infinite; }
+        @keyframes orbRing {
+            0% { transform: scale(1); opacity: .55; }
+            100% { transform: scale(1.7); opacity: 0; }
+        }
+        @keyframes orbGlow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0), var(--shadow-soft); }
+            50% { box-shadow: 0 0 22px 2px rgba(14, 165, 233, .35), var(--shadow-soft); }
+        }
+        .thinking-bubble { display: inline-flex; align-items: center; gap: .65rem; padding: .75rem 1rem; align-self: flex-start; }
+        .think-text {
+            font-size: .88rem; font-weight: 500;
+            background: linear-gradient(90deg, var(--muted) 0%, var(--muted) 35%, var(--accent) 50%, var(--muted) 65%, var(--muted) 100%);
+            background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
+            animation: shimmer 2s linear infinite; transition: opacity .3s ease, transform .3s ease;
+        }
+        .think-text.swap { opacity: 0; transform: translateY(4px); }
+        @keyframes shimmer { from { background-position: 120% 0; } to { background-position: -120% 0; } }
+        .think-dots { display: inline-flex; gap: 3px; }
+        .think-dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); animation: dotBounce 1.2s infinite ease-in-out; }
+        .think-dots i:nth-child(2) { animation-delay: .15s; }
+        .think-dots i:nth-child(3) { animation-delay: .3s; }
+        @keyframes dotBounce { 0%, 60%, 100% { transform: translateY(0); opacity: .45; } 30% { transform: translateY(-5px); opacity: 1; } }
+        .think-timer {
+            font-size: .7rem; font-variant-numeric: tabular-nums; color: var(--faint);
+            background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: .1rem .5rem;
+        }
+
+        /* ---------- Empty state ---------- */
+        .hero-logo {
+            position: relative; width: 5.5rem; height: 5.5rem; border-radius: 1.6rem; margin: 0 auto;
+            display: grid; place-items: center; background: var(--surface); border: 1px solid var(--line);
+            box-shadow: 0 20px 50px -20px rgba(2, 132, 199, .55); animation: float 5s ease-in-out infinite;
+        }
+        .hero-logo img { width: 3.2rem; height: 3.2rem; object-fit: contain; }
+        .hero-logo::before {
+            content: ''; position: absolute; inset: -3px; border-radius: inherit; z-index: -1;
+            background: conic-gradient(from 0deg, #0ea5e9, #7dd3fc, transparent 40%, #0284c7, #0ea5e9);
+            animation: spin 6s linear infinite; filter: blur(6px); opacity: .8;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        .hero-title {
+            background: linear-gradient(135deg, var(--text) 30%, var(--accent)); -webkit-background-clip: text;
+            background-clip: text; color: transparent;
+        }
+
+        /* ---------- Composer ---------- */
+        .composer {
+            background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-soft);
+            transition: border-color .2s ease, box-shadow .25s ease;
+        }
+        .composer:focus-within { border-color: rgba(14, 165, 233, .45); box-shadow: 0 0 0 4px var(--accent-soft), var(--shadow-soft); }
+        .tool-btn {
+            position: relative; width: 2.5rem; height: 2.5rem; border-radius: .8rem; flex-shrink: 0;
+            display: grid; place-items: center; color: var(--faint); font-size: 1.05rem;
+            transition: color .2s ease, background-color .2s ease, transform .2s ease;
+        }
+        .tool-btn:hover:not(:disabled) { color: var(--accent); background: var(--accent-soft); }
+        .tool-btn:active:not(:disabled) { transform: scale(.92); }
+        .tool-btn:disabled { opacity: .4; cursor: not-allowed; }
+        .tool-btn.is-recording { color: #ef4444; background: rgba(239, 68, 68, .12); }
+        .tool-btn.is-recording::before, .tool-btn.is-recording::after {
+            content: ''; position: absolute; inset: 0; border-radius: inherit; border: 2px solid #ef4444;
+            animation: orbRing 1.4s ease-out infinite;
+        }
+        .tool-btn.is-recording::after { animation-delay: .7s; }
+        #text-input {
+            flex: 1; min-width: 0; resize: none; background: transparent; color: var(--text);
+            padding: .6rem .35rem; max-height: 10rem; line-height: 1.5; font-size: .95rem;
+        }
+        #text-input:focus { outline: none; }
+        #text-input::placeholder { color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .send-btn {
+            width: 2.6rem; height: 2.6rem; border-radius: .85rem; flex-shrink: 0; display: grid; place-items: center;
+            color: #fff; background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            box-shadow: 0 8px 20px -8px rgba(2, 132, 199, .8);
+            transition: transform .2s ease, box-shadow .2s ease, filter .2s ease, opacity .2s ease;
+        }
+        .send-btn:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.06); }
+        .send-btn:disabled { background: linear-gradient(135deg, #94a3b8, #64748b); box-shadow: none; opacity: .5; cursor: not-allowed; }
+        .send-btn.fly i { animation: fly .6s cubic-bezier(.5, 0, .3, 1); }
+        @keyframes fly {
+            0% { transform: translate(0, 0) rotate(0); opacity: 1; }
+            45% { transform: translate(18px, -18px) rotate(10deg); opacity: 0; }
+            46% { transform: translate(-14px, 14px); opacity: 0; }
+            100% { transform: translate(0, 0); opacity: 1; }
+        }
+
+        /* Scroll-to-bottom button */
+        #scroll-bottom { transition: opacity .25s ease, transform .25s ease; }
+        #scroll-bottom.hide { opacity: 0; transform: translateY(10px); pointer-events: none; }
+
+        /* ---------- QR overlay ---------- */
+        #qr-overlay { transition: opacity .3s ease; opacity: 0; }
+        #qr-overlay.open { opacity: 1; }
+        .qr-frame {
+            position: relative; width: min(70vw, 280px); aspect-ratio: 1; border-radius: 1.5rem;
+            box-shadow: 0 0 0 200vmax rgba(2, 6, 23, .62);
+        }
+        .qr-frame span { position: absolute; width: 2.4rem; height: 2.4rem; border: 4px solid #38bdf8; }
+        .qr-frame span:nth-child(1) { top: 0; left: 0; border-right: 0; border-bottom: 0; border-top-left-radius: 1.5rem; }
+        .qr-frame span:nth-child(2) { top: 0; right: 0; border-left: 0; border-bottom: 0; border-top-right-radius: 1.5rem; }
+        .qr-frame span:nth-child(3) { bottom: 0; left: 0; border-right: 0; border-top: 0; border-bottom-left-radius: 1.5rem; }
+        .qr-frame span:nth-child(4) { bottom: 0; right: 0; border-left: 0; border-top: 0; border-bottom-right-radius: 1.5rem; }
+        .qr-line {
+            position: absolute; left: 8%; right: 8%; height: 2px; top: 10%; border-radius: 2px;
+            background: linear-gradient(90deg, transparent, #38bdf8, transparent);
+            box-shadow: 0 0 14px 2px rgba(56, 189, 248, .7); animation: scan 2.2s ease-in-out infinite alternate;
+        }
+        @keyframes scan { to { top: 90%; } }
+
+        /* ---------- Modal + toasts ---------- */
+        #confirm-modal { transition: opacity .2s ease; opacity: 0; }
+        #confirm-modal.open { opacity: 1; }
+        #confirm-modal .modal-card { transform: scale(.94) translateY(8px); transition: transform .25s cubic-bezier(.2, .9, .3, 1.2); }
+        #confirm-modal.open .modal-card { transform: scale(1) translateY(0); }
+        .toast {
+            display: flex; align-items: flex-start; gap: .6rem; padding: .75rem .95rem; border-radius: .9rem;
+            background: var(--surface); color: var(--text); border: 1px solid var(--line);
+            box-shadow: 0 18px 40px -16px rgba(15, 23, 42, .35); font-size: .85rem; max-width: 22rem;
+            animation: toastIn .35s cubic-bezier(.2, .9, .3, 1.2) both;
+        }
+        .toast.out { animation: toastOut .25s ease forwards; }
+        .toast .toast-icon { margin-top: .1rem; }
+        .toast.error .toast-icon { color: #ef4444; }
+        .toast.success .toast-icon { color: #22c55e; }
+        .toast.info .toast-icon { color: var(--accent); }
+        @keyframes toastIn { from { opacity: 0; transform: translateY(-10px) scale(.96); } to { opacity: 1; transform: none; } }
+        @keyframes toastOut { to { opacity: 0; transform: translateY(-8px) scale(.96); } }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
         }
     </style>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 font-sans">
-    <div class="flex h-screen overflow-hidden">
-        <!-- Mobile Menu Button -->
-        <button id="mobile-menu-button" class="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-            <i class="fas fa-bars text-xl"></i>
-        </button>
+<body class="font-sans">
+    <div class="bg-aurora" aria-hidden="true"></div>
 
-        <!-- Sidebar -->
-        <div id="sidebar" class="fixed inset-y-0 left-0 z-40 w-80 bg-white dark:bg-gray-800 shadow-xl transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out flex flex-col">
-            <!-- Sidebar Header -->
-            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-                <div class="flex items-center justify-between space-x-2 mb-4">
-                    <div class="relative">
-                        <img src="https://i.ibb.co/s9hYcgbN/logo1-1.png" alt="Prahari AI Logo" class="block dark:hidden w-48 imgg object-contain">
-                        <img src="https://i.ibb.co/j9wndrXd/logot.png" alt="Prahari AI Logo" class="hidden dark:block w-48 imgg object-contain">
-                    </div>
-                    <!-- Close Button for Mobile -->
-                    <button id="close-sidebar-button" class="lg:hidden p-2 text-gray-600 dark:text-gray-300 hover:text-parihar-500 hover:bg-parihar-50 dark:hover:bg-parihar-900/20 rounded-lg transition-colors">
-                        <i class="fas fa-times text-xl"></i>
+    <div class="relative z-10 flex h-screen h-[100dvh] overflow-hidden">
+
+        <!-- ================= Sidebar ================= -->
+        <aside id="sidebar" class="glass fixed inset-y-0 left-0 z-40 w-72 sm:w-80 border-r hairline transform -translate-x-full lg:translate-x-0 lg:static transition-transform duration-300 ease-out flex flex-col">
+            <div class="p-4 pb-3">
+                <div class="flex items-center justify-between mb-4">
+                    <img src="https://i.ibb.co/s9hYcgbN/logo1-1.png" alt="Prahari AI Logo" class="block dark:hidden imgg object-contain">
+                    <img src="https://i.ibb.co/j9wndrXd/logot.png" alt="Prahari AI Logo" class="hidden dark:block imgg object-contain">
+                    <button id="close-sidebar-button" class="hdr-btn lg:hidden" title="Close menu">
+                        <i class="fas fa-times"></i>
                     </button>
                 </div>
-                <button id="new-chat" class="w-full bg-gradient-to-r from-parihar-500 to-parihar-600 hover:from-parihar-600 hover:to-parihar-700 text-white font-medium py-2 px-3 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg text-sm">
-                    <i class="fas fa-plus mr-1"></i>
-                    New Conversation
+                <button id="new-chat" class="new-chat-btn w-full text-white font-medium py-2.5 px-3 rounded-xl text-sm flex items-center justify-center gap-2">
+                    <i class="fas fa-plus text-xs"></i>
+                    <span data-i18n="newChat">New Conversation</span>
                 </button>
+                <div class="relative mt-3">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-xs" style="color: var(--faint)"></i>
+                    <input id="chat-search" type="text" autocomplete="off" placeholder="Search chats"
+                           class="search-box w-full rounded-xl pl-8 pr-3 py-2 text-sm transition-all">
+                </div>
             </div>
 
-            <!-- Chat List -->
-            <div class="flex-1 overflow-y-auto chat-scroll p-2">
-                <div class="space-y-1">
-                    {% for session in chat_sessions %}
-                        <div class="chat-item group relative bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-xl p-2 cursor-pointer transition-all duration-200 {% if session.id == active_session_id %}bg-gradient-to-r from-parihar-50 to-parihar-100 dark:from-parihar-900 dark:to-parihar-800 border-2 border-parihar-200 dark:border-parihar-700{% endif %}"
-                             data-session-id="{{ session.id }}">
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1 min-w-0">
-                                    <h3 class="font-medium text-gray-800 dark:text-white truncate text-sm mb-1">
-                                        {{ session.title|default:"New Chat" }}
-                                    </h3>
-                                    <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
-                                        <i class="fas fa-clock mr-1"></i>
-                                        <span>{{ session.updated_at|date:"M d, Y H:i" }}</span>
+            <div id="chat-list" class="flex-1 overflow-y-auto chat-scroll px-2 pb-3">
+                {% for session in chat_sessions %}
+                    <div class="chat-item {% if session.id == active_session_id %}is-active{% endif %}"
+                         data-session-id="{{ session.id }}"
+                         data-updated="{{ session.updated_at|date:'c' }}"
+                         data-title="{{ session.title|default:'New Chat'|lower }}">
+                        <div class="chat-icon"><i class="far fa-message"></i></div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="chat-title font-medium truncate text-sm">{{ session.title|default:"New Chat" }}</h3>
+                            <span class="chat-time text-xs" data-time="{{ session.updated_at|date:'c' }}">{{ session.updated_at|date:"M d, H:i" }}</span>
+                        </div>
+                        <button class="delete-chat-button" data-session-id="{{ session.id }}" title="Delete chat">
+                            <i class="fas fa-trash-alt text-xs"></i>
+                        </button>
+                    </div>
+                {% endfor %}
+                <div id="no-chats" class="text-center py-10 {% if chat_sessions %}hidden{% endif %}">
+                    <div class="w-12 h-12 mx-auto mb-3 rounded-2xl grid place-items-center" style="background: var(--accent-soft); color: var(--accent)">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <p class="text-xs font-medium" style="color: var(--muted)" data-i18n="noChats">No conversations yet</p>
+                    <p class="text-xs mt-1" style="color: var(--faint)" data-i18n="noChatsSub">Start chatting to see your history</p>
+                </div>
+                <p id="no-results" class="hidden text-center text-xs py-8" style="color: var(--faint)" data-i18n="noResults">No chats found</p>
+            </div>
+
+            <div class="px-4 py-3 border-t hairline flex items-center gap-2 text-xs" style="color: var(--muted)">
+                <span class="status-dot"></span>
+                <span>MaintenanceMateAI is online</span>
+            </div>
+        </aside>
+
+        <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-30 lg:hidden hidden"></div>
+
+        <!-- ================= Main ================= -->
+        <main class="flex-1 flex flex-col min-w-0 relative">
+            <!-- Header -->
+            <header class="glass border-b hairline px-3 lg:px-6 h-16 flex items-center gap-2 flex-shrink-0 z-20">
+                <button id="mobile-menu-button" class="hdr-btn lg:hidden" title="Menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="flex items-center gap-3 min-w-0 flex-1">
+                    <div class="hidden sm:block"><div class="avatar-ai"><img src="https://i.ibb.co/V0RKxqfg/logo.png" alt=""></div></div>
+                    <div class="min-w-0">
+                        <h2 class="text-sm sm:text-[15px] font-semibold truncate" style="color: var(--text)">MaintenanceMateAI</h2>
+                        <p class="text-xs flex items-center gap-1.5 truncate" style="color: var(--muted)">
+                            <span class="status-dot"></span>
+                            <span data-i18n="status">Online · Ready to help</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1 sm:gap-1.5">
+                    <div class="lang-wrap">
+                        <select id="language-select" class="lang-select" title="Language">
+                            <option value="en-US">English (EN)</option>
+                            <option value="hi-IN">Hindi (HI)</option>
+                            <option value="ja-JP">Japanese (JP)</option>
+                            <option value="ko-KR">Korean (KO)</option>
+                        </select>
+                    </div>
+                    <button id="speech-toggle-button" class="hdr-btn" title="Toggle voice output">
+                        <i class="fas fa-volume-up"></i>
+                    </button>
+                    <button id="pdf-preview-button" class="hdr-btn" title="Preview PDF">
+                        <i class="fas fa-file-pdf"></i>
+                    </button>
+                    <button id="theme-toggle" class="hdr-btn theme-toggle" title="Switch day / night theme">
+                        <i class="fas fa-moon"></i>
+                        <i class="fas fa-sun"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Messages -->
+            <div id="messages-container" class="flex-1 overflow-y-auto chat-scroll">
+                <div id="messages-inner" class="max-w-3xl mx-auto px-3 sm:px-6 py-6 min-h-full flex flex-col">
+                    {% for message in messages %}
+                        {% if message.is_user %}
+                            <div class="msg msg-user">
+                                <div class="msg-body">
+                                    <div class="bubble-user">
+                                        {% if message.text %}<div class="user-text">{{ message.text }}</div>{% endif %}
+                                        {% if message.file_data %}
+                                            {% if message.file_mime_type|slice:":6" == "image/" %}
+                                                <img src="data:{{ message.file_mime_type }};base64,{{ message.file_data }}" alt="Uploaded content" class="bubble-img">
+                                            {% elif message.file_mime_type == "application/pdf" %}
+                                                <div class="file-chip">
+                                                    <span class="file-icon"><i class="fas fa-file-pdf"></i></span>
+                                                    <div><p class="file-name">PDF Document</p><p class="file-sub">Attached</p></div>
+                                                </div>
+                                            {% else %}
+                                                <div class="file-chip">
+                                                    <span class="file-icon"><i class="fas fa-file"></i></span>
+                                                    <div><p class="file-name">File Attachment</p><p class="file-sub">{{ message.file_mime_type }}</p></div>
+                                                </div>
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+                                    <div class="msg-meta"><time class="msg-time" data-time="{{ message.created_at|date:'c' }}"></time></div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="msg msg-ai">
+                                <div class="avatar-ai"><img src="https://i.ibb.co/V0RKxqfg/logo.png" alt=""></div>
+                                <div class="msg-body">
+                                    <div class="msg-meta"><span class="msg-name">MaintenanceMateAI</span><time class="msg-time" data-time="{{ message.created_at|date:'c' }}"></time></div>
+                                    <div class="bubble-ai"><div class="md" data-render-md>{{ message.text|default:"" }}</div></div>
+                                    <div class="msg-actions">
+                                        <button type="button" class="act-btn act-copy"><i class="far fa-copy"></i><span>Copy</span></button>
+                                        <button type="button" class="act-btn act-speak"><i class="fas fa-volume-up"></i><span>Read aloud</span></button>
                                     </div>
                                 </div>
-                                <button class="delete-chat-button opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-150 hover:bg-red-150 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200"
-                                        data-session-id="{{ session.id }}"
-                                        title="Delete chat">
-                                    <i class="fas fa-trash-alt text-sm"></i>
-                                </button>
                             </div>
-                            {% if session.id == active_session_id %}
-                                <div class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-6 bg-parihar-500 rounded-r-full"></div>
-                            {% endif %}
-                        </div>
+                        {% endif %}
                     {% endfor %}
-                    {% if not chat_sessions %}
-                        <div class="text-center py-4">
-                            <div class="w-12 h-12 mx-auto mb-2 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                                <i class="fas fa-comments text-xl text-gray-400"></i>
+
+                    {% if not messages %}
+                        <div id="empty-state" class="flex-1 flex items-center justify-center py-10">
+                            <div class="text-center max-w-md mx-auto px-4">
+                                <div class="hero-logo mb-7"><img src="https://i.ibb.co/V0RKxqfg/logo.png" alt=""></div>
+                                <h3 class="hero-title text-2xl sm:text-3xl font-bold mb-3">MaintenanceMate AI</h3>
+                                <p class="text-sm sm:text-[15px] leading-relaxed" style="color: var(--muted)" data-i18n="welcome">
+                                    Your intelligent assistant is ready to help. Ask me anything or upload a file to get started!
+                                </p>
                             </div>
-                            <p class="text-gray-500 dark:text-gray-400 text-xs">No conversations yet</p>
-                            <p class="text-gray-400 dark:text-gray-500 text-xs mt-1">Start chatting to see your history</p>
                         </div>
                     {% endif %}
                 </div>
             </div>
 
-            <!-- Sidebar Footer -->
-            <div class="p-2 border-t border-gray-200 dark:border-gray-700">
-                <div class="flex items-center space-x-1 text-xs text-gray-500 dark:text-gray-400">
-                    <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    <span>MaintenanceMateAI is online</span>
-                </div>
-            </div>
-        </div>
+            <button id="scroll-bottom" class="hide absolute left-1/2 -translate-x-1/2 bottom-28 z-20 w-9 h-9 rounded-full grid place-items-center glass border hairline shadow-lg" style="color: var(--muted)" title="Scroll to latest">
+                <i class="fas fa-arrow-down text-sm"></i>
+            </button>
 
-        <!-- Sidebar Overlay for Mobile -->
-        <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden hidden"></div>
-
-        <!-- Main Chat Area -->
-        <div class="flex-1 flex flex-col min-w-0">
-            <!-- Chat Header -->
-            <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-2 lg:p-4">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-2">
-                        <div class="sidesade">
-                            <h2 class="text-lg font-semibold text-gray-800 dark:text-white">MaintenanceMateAI</h2>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Ready to help you with anything</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-1">
-                        <div class="relative">
-                            <select id="language-select" class="language-dropdown bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-1.5 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-parihar-500 transition-all duration-200 text-sm">
-                                <option value="en-US">English (EN)</option>
-                                <option value="hi-IN">Hindi (HI)</option>
-                                <option value="ja-JP">Japanese (JP)</option>
-                                <option value="ko-KR">Korean (KO)</option>
-                            </select>
-                        </div>
-                        <button id="speech-toggle-button" class="p-2 text-gray-400 hover:text-parihar-500 hover:bg-parihar-50 dark:hover:bg-parihar-900/20 rounded-lg transition-colors" title="Toggle voice output">
-                            <i class="fas fa-volume-up"></i>
+            <!-- Composer -->
+            <div class="px-3 sm:px-6 pt-2 pb-3 sm:pb-5 flex-shrink-0">
+                <form id="chat-form" class="max-w-3xl mx-auto">
+                    <input type="file" id="file-input" accept="image/*,application/pdf" class="hidden">
+                    <div class="composer flex items-end gap-1 p-1.5 sm:p-2 rounded-[1.35rem]">
+                        <button type="button" id="file-button" class="tool-btn" title="Upload file">
+                            <i class="fas fa-paperclip"></i>
                         </button>
-                        <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                          <button id="pdf-preview-button" 
-        class="p-2 text-gray-400 hover:text-parihar-500 hover:bg-parihar-50 dark:hover:bg-parihar-900/20 rounded-lg transition-colors" 
-        title="Preview PDF">
-    <i class="fas fa-file-pdf"></i>
-</button>
+                        <button type="button" id="mic-button" class="tool-btn" title="Voice input">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                        <button type="button" id="qr-button" class="tool-btn" title="Scan QR Code">
+                            <i class="fas fa-qrcode"></i>
+                        </button>
+                        <textarea id="text-input" rows="1" placeholder="Message MaintenanceMate AI..." autocomplete="off"></textarea>
+                        <button type="submit" id="send-button" class="send-btn" title="Send">
+                            <i class="fas fa-paper-plane text-sm"></i>
+                        </button>
                     </div>
-                  
-                </div>
+                    <p class="hidden sm:block text-center text-[11px] mt-2" style="color: var(--faint)" data-i18n="hint">
+                        Enter to send · Shift + Enter for a new line
+                    </p>
+                </form>
             </div>
+        </main>
+    </div>
 
-            <!-- Messages Container -->
-            <div id="messages-container" class="flex-1 overflow-y-auto chat-scroll p-2 lg:p-4">
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="message-slide-in mb-4 {% if message.is_user %}flex justify-end{% else %}flex justify-start{% endif %}">
-                            <div class="flex items-start space-x-2 max-w-4xl">
-                                {% if not message.is_user %}
-                                    <div class="flex-shrink-0">
-                                        <div class="w-6 h-6 bg-gradient-to-r   rounded-lg flex items-center justify-center">
-                                            <img src="https://i.ibb.co/V0RKxqfg/logo.png" alt="Prahari AI Logo" class="block dark:hidden w-48 imgg object-contain">
-                                            <img src="https://i.ibb.co/V0RKxqfg/logo.png" alt="Prahari AI Logo" class="hidden dark:block w-48 imgg object-contain">
-                                        </div>
-                                    </div>
-                                {% endif %}
-                                <div class="flex flex-col {% if message.is_user %}items-end{% else %}items-start{% endif %}">
-                                    <div class="{% if message.is_user %}bg-gradient-to-r from-parihar-500 to-parihar-600 text-white{% else %}bg-white dark:bg-gray-700 text-gray-800 dark:text-white shadow-lg{% endif %} rounded-2xl px-3 py-2 max-w-md lg:max-w-2xl">
-                                        {% if message.text %}
-                                            <p class="text-sm leading-relaxed">{{ message.text }}</p>
-                                        {% endif %}
-                                        {% if message.file_data %}
-                                            <div class="mt-2">
-                                                {% if message.file_mime_type|slice:":6" == "image/" %}
-                                                    <img src="data:{{ message.file_mime_type }};base64,{{ message.file_data }}"
-                                                         alt="Uploaded content"
-                                                         class="rounded-lg max-w-full h-auto shadow-md">
-                                                {% elif message.file_mime_type == "application/pdf" %}
-                                                    <div class="flex items-center space-x-2 p-2 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                                                        <div class="w-8 h-8 bg-green-100 dark:bg-green-900/40 rounded-lg flex items-center justify-center">
-                                                            <i class="fas fa-file-pdf text-green-500 text-sm"></i>
-                                                        </div>
-                                                        <div>
-                                                            <p class="font-medium text-green-800 dark:text-green-200 text-xs">PDF Document</p>
-                                                            <p class="text-green-600 dark:text-green-150 text-xs">Successfully uploaded</p>
-                                                        </div>
-                                                    </div>
-                                                {% else %}
-                                                    <div class="flex items-center space-x-2 p-2 bg-gray-50 dark:bg-gray-600 rounded-lg">
-                                                        <div class="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                                                            <i class="fas fa-file text-gray-500 text-sm"></i>
-                                                        </div>
-                                                        <div>
-                                                            <p class="font-medium text-gray-800 dark:text-gray-200 text-xs">File Attachment</p>
-                                                            <p class="text-gray-600 dark:text-gray-400 text-xs">{{ message.file_mime_type }}</p>
-                                                        </div>
-                                                    </div>
-                                                {% endif %}
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                    <span class="text-xs text-gray-400 mt-1 px-1">
-                                        {% if message.is_user %}You{% else %}MaintenanceMateAI{% endif %}
-                                    </span>
-                                </div>
-                                {% if message.is_user %}
-                                    <div class="flex-shrink-0">
-                                        <div class="w-6 h-6 bg-gray-300 dark:bg-gray-600 rounded-lg flex items-center justify-center">
-                                            <i class="fas fa-user text-gray-600 dark:text-gray-300 text-xs"></i>
-                                        </div>
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    {% endfor %}
-                {% else %}
-                    <div id="empty-state" class="flex-1 flex items-center justify-center">
-                        <div class="text-center max-w-md mx-auto">
-                            <div class="relative mb-6">
-                                <div class="w-20 h-20 mx-auto bg-gradient-to-r from-parihar-500 to-parihar-600 rounded-3xl flex items-center justify-center logo-glow">
-                                    <span class="text-white font-bold text-3xl">M</span>
-                                </div>
-                                <div class="absolute -top-2 -right-2 w-6 h-6 bg-green-400 rounded-full border-4 border-white dark:border-gray-900 animate-bounce-gentle"></div>
-                            </div>
-                            <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">MaintenanceMate AI</h3>
-                            <p class="text-gray-600 dark:text-gray-400 mb-4">Your intelligent assistant is ready to help. Ask me anything or upload a file to get started!</p>
-                        </div>
-                    </div>
-                {% endif %}
-                <div class="loading-indicator hidden mb-4">
-                    <div class="flex justify-start">
-                        <div class="flex items-start space-x-2 max-w-4xl">
-                            <div class="flex-shrink-0">
-                                <div class="w-6 h-6 bg-gradient-to-r   rounded-lg flex items-center justify-center">
-                                    <img src="https://i.ibb.co/V0RKxqfg/logo.png" alt="Prahari AI Logo" class="block dark:hidden w-48 imgg object-contain">
-                                    <img src="https://i.ibb.co/V0RKxqfg/logo.png" alt="Prahari AI Logo" class="hidden dark:block w-48 imgg object-contain">
-                                </div>
-                            </div>
-                            <div class="bg-white dark:bg-gray-700 rounded-2xl px-3 py-2 shadow-lg">
-                                <div class="flex items-center space-x-1">
-                                    <span class="text-sm text-gray-600 dark:text-gray-300">MaintenanceMate is thinking</span>
-                                    <div class="flex space-x-1">
-                                        <div class="w-1.5 h-1.5 bg-parihar-500 rounded-full typing-dot"></div>
-                                        <div class="w-1.5 h-1.5 bg-parihar-500 rounded-full typing-dot"></div>
-                                        <div class="w-1.5 h-1.5 bg-parihar-500 rounded-full typing-dot"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <!-- ================= QR scanner overlay ================= -->
+    <div id="qr-overlay" class="hidden fixed inset-0 z-[60] bg-black">
+        <video id="qr-video" class="absolute inset-0 w-full h-full object-cover" autoplay playsinline muted></video>
+        <div class="absolute inset-0 flex flex-col items-center justify-center gap-8 px-6">
+            <div class="qr-frame"><span></span><span></span><span></span><span></span><div class="qr-line"></div></div>
+            <p id="qr-hint" class="relative text-white/90 text-sm font-medium text-center">Point the camera at a QR code</p>
+        </div>
+        <button id="qr-cancel" class="absolute bottom-10 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md text-white text-sm font-medium border border-white/20 transition-colors">
+            <i class="fas fa-times mr-2"></i><span>Cancel</span>
+        </button>
+    </div>
+
+    <!-- ================= Confirm dialog ================= -->
+    <div id="confirm-modal" class="hidden fixed inset-0 z-[70] grid place-items-center bg-slate-900/50 backdrop-blur-sm p-4">
+        <div class="modal-card w-full max-w-sm rounded-2xl p-6 border hairline" style="background: var(--surface); box-shadow: var(--shadow-soft)">
+            <div class="w-11 h-11 rounded-xl grid place-items-center mb-4 bg-red-500/10 text-red-500">
+                <i class="fas fa-trash-alt"></i>
             </div>
-
-            <!-- Input Container -->
-            <div class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-2 lg:p-4">
-                <div class="max-w-4xl mx-auto">
-                    <form id="chat-form" class="relative">
-                        <input type="file" id="file-input" accept="image/*,application/pdf" class="hidden">
-                        <div class="flex items-end space-x-2">
-                            <div class="flex space-x-1">
-                                <button type="button" id="file-button" class="p-2 text-gray-400 hover:text-parihar-500 hover:bg-parihar-50 dark:hover:bg-parihar-900/20 rounded-xl transition-colors" title="Upload file">
-                                    <i class="fas fa-paperclip text-lg"></i>
-                                </button>
-                                <button type="button" id="mic-button" class="p-2 text-gray-400 hover:text-parihar-500 hover:bg-parihar-50 dark:hover:bg-parihar-900/20 rounded-xl transition-colors" title="Voice input">
-                                    <i class="fas fa-microphone text-lg"></i>
-                                </button>
-                                <button type="button" id="qr-button" class="p-2 text-gray-400 hover:text-parihar-500 hover:bg-parihar-50 dark:hover:bg-parihar-900/20 rounded-xl transition-colors" title="Scan QR Code">
-                                    <i class="fas fa-qrcode text-lg"></i>
-                                </button>
-                            </div>
-                            <div class="flex-1 relative">
-                                <input type="text"
-                                       id="text-input"
-                                       class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-2xl px-4 py-2 pr-10 text-gray-800 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-parihar-500 focus:border-transparent transition-all duration-200"
-                                       placeholder="Message MaintenanceMate AI..."
-                                       autocomplete="off">
-                                <button type="submit"
-                                        id="send-button"
-                                        class="absolute right-1 top-1/2 transform -translate-y-1/2 w-10 h-8 bg-gradient-to-r from-parihar-500 to-parihar-600 hover:from-parihar-600 hover:to-parihar-700 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-xl transition-all duration-200 flex items-center justify-center disabled:cursor-not-allowed">
-                                    <i class="fas fa-paper-plane text-sm"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+            <h4 id="confirm-title" class="font-semibold text-base mb-1" style="color: var(--text)">Delete chat?</h4>
+            <p id="confirm-text" class="text-sm mb-6" style="color: var(--muted)"></p>
+            <div class="flex justify-end gap-2">
+                <button id="confirm-cancel" class="px-4 py-2 rounded-xl text-sm font-medium border hairline" style="color: var(--text)">Cancel</button>
+                <button id="confirm-ok" class="px-4 py-2 rounded-xl text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors">Delete</button>
             </div>
         </div>
     </div>
-    <video id="qr-video" class="hidden" autoplay></video>
+
+    <div id="toast-container" class="fixed top-4 right-4 left-4 sm:left-auto z-[80] flex flex-col items-center sm:items-end gap-2 pointer-events-none"></div>
+
     <script src="{% static 'js/jsQR.min.js' %}"></script>
     <script>
         // Text-to-Speech function
@@ -444,6 +686,114 @@
             window.speechSynthesis.speak(utterance);
         }
 
+        const AI_LOGO = 'https://i.ibb.co/V0RKxqfg/logo.png';
+
+        // UI text in each language
+        const T = {
+            'en-US': {
+                stagesDoc: ['Reading your document', 'Analyzing the problem', 'Checking the manual', 'Preparing the steps'],
+                stages: ['Analyzing the problem', 'Checking the manual', 'Preparing the steps'],
+                slow: 'Taking a little longer than usual',
+                copy: 'Copy', copied: 'Copied to clipboard', readAloud: 'Read aloud', stop: 'Stop', skip: 'Skip',
+                search: 'Search chats', today: 'Today', yesterday: 'Yesterday', week: 'Previous 7 days', older: 'Older',
+                newChat: 'New Conversation', noChats: 'No conversations yet', noChatsSub: 'Start chatting to see your history',
+                noResults: 'No chats found', status: 'Online · Ready to help',
+                welcome: 'Your intelligent assistant is ready to help. Ask me anything or upload a file to get started!',
+                hint: 'Enter to send · Shift + Enter for a new line',
+                deleteTitle: 'Delete chat?', cancel: 'Cancel', del: 'Delete', deleted: 'Chat deleted',
+                qrHint: 'Point the camera at a QR code', qrLoading: 'Downloading document…',
+                pdfName: 'PDF Document', attached: 'Attached', fileName: 'File Attachment'
+            },
+            'hi-IN': {
+                stagesDoc: ['आपका दस्तावेज़ पढ़ रहा है', 'समस्या का विश्लेषण कर रहा है', 'मैनुअल देख रहा है', 'चरण तैयार कर रहा है'],
+                stages: ['समस्या का विश्लेषण कर रहा है', 'मैनुअल देख रहा है', 'चरण तैयार कर रहा है'],
+                slow: 'सामान्य से थोड़ा अधिक समय लग रहा है',
+                copy: 'कॉपी', copied: 'क्लिपबोर्ड पर कॉपी किया गया', readAloud: 'सुनें', stop: 'रोकें', skip: 'छोड़ें',
+                search: 'चैट खोजें', today: 'आज', yesterday: 'कल', week: 'पिछले 7 दिन', older: 'पुराने',
+                newChat: 'नई बातचीत', noChats: 'अभी कोई बातचीत नहीं', noChatsSub: 'इतिहास देखने के लिए चैट शुरू करें',
+                noResults: 'कोई चैट नहीं मिली', status: 'ऑनलाइन · मदद के लिए तैयार',
+                welcome: 'आपका बुद्धिमान सहायक मदद के लिए तैयार है। कुछ भी पूछें या शुरू करने के लिए फ़ाइल अपलोड करें!',
+                hint: 'भेजने के लिए Enter · नई लाइन के लिए Shift + Enter',
+                deleteTitle: 'चैट हटाएं?', cancel: 'रद्द करें', del: 'हटाएं', deleted: 'चैट हटा दी गई',
+                qrHint: 'कैमरे को QR कोड की ओर रखें', qrLoading: 'दस्तावेज़ डाउनलोड हो रहा है…',
+                pdfName: 'PDF दस्तावेज़', attached: 'संलग्न', fileName: 'फ़ाइल'
+            },
+            'ja-JP': {
+                stagesDoc: ['ドキュメントを読んでいます', '問題を分析しています', 'マニュアルを確認しています', '手順を準備しています'],
+                stages: ['問題を分析しています', 'マニュアルを確認しています', '手順を準備しています'],
+                slow: '通常より少し時間がかかっています',
+                copy: 'コピー', copied: 'クリップボードにコピーしました', readAloud: '読み上げ', stop: '停止', skip: 'スキップ',
+                search: 'チャットを検索', today: '今日', yesterday: '昨日', week: '過去7日間', older: 'それ以前',
+                newChat: '新しい会話', noChats: 'まだ会話がありません', noChatsSub: 'チャットを始めると履歴が表示されます',
+                noResults: 'チャットが見つかりません', status: 'オンライン · サポート準備完了',
+                welcome: 'インテリジェントアシスタントがお手伝いします。何でも質問するか、ファイルをアップロードしてください！',
+                hint: 'Enterで送信 · Shift + Enterで改行',
+                deleteTitle: 'チャットを削除しますか？', cancel: 'キャンセル', del: '削除', deleted: 'チャットを削除しました',
+                qrHint: 'カメラをQRコードに向けてください', qrLoading: 'ドキュメントをダウンロード中…',
+                pdfName: 'PDFドキュメント', attached: '添付済み', fileName: '添付ファイル'
+            },
+            'ko-KR': {
+                stagesDoc: ['문서를 읽는 중', '문제를 분석하는 중', '매뉴얼을 확인하는 중', '단계를 준비하는 중'],
+                stages: ['문제를 분석하는 중', '매뉴얼을 확인하는 중', '단계를 준비하는 중'],
+                slow: '평소보다 조금 더 걸리고 있습니다',
+                copy: '복사', copied: '클립보드에 복사됨', readAloud: '읽어주기', stop: '중지', skip: '건너뛰기',
+                search: '채팅 검색', today: '오늘', yesterday: '어제', week: '지난 7일', older: '이전',
+                newChat: '새 대화', noChats: '아직 대화가 없습니다', noChatsSub: '채팅을 시작하면 기록이 표시됩니다',
+                noResults: '채팅을 찾을 수 없습니다', status: '온라인 · 도움 준비 완료',
+                welcome: '지능형 어시스턴트가 도와드립니다. 무엇이든 물어보거나 파일을 업로드하세요!',
+                hint: 'Enter로 전송 · Shift + Enter로 줄바꿈',
+                deleteTitle: '채팅을 삭제하시겠습니까?', cancel: '취소', del: '삭제', deleted: '채팅이 삭제되었습니다',
+                qrHint: '카메라를 QR 코드에 맞춰주세요', qrLoading: '문서를 다운로드하는 중…',
+                pdfName: 'PDF 문서', attached: '첨부됨', fileName: '첨부 파일'
+            }
+        };
+
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text == null ? '' : String(text);
+            return div.innerHTML;
+        }
+
+        function storageGet(key) {
+            try { return localStorage.getItem(key); } catch (e) { return null; }
+        }
+
+        function storageSet(key, value) {
+            try { localStorage.setItem(key, value); } catch (e) {}
+        }
+
+        // Open links in AI replies in a new tab
+        if (window.DOMPurify) {
+            DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+                if (node.tagName === 'A') {
+                    node.setAttribute('target', '_blank');
+                    node.setAttribute('rel', 'noopener noreferrer');
+                }
+            });
+        }
+
+        function renderMarkdown(text) {
+            if (window.marked && window.DOMPurify) {
+                return DOMPurify.sanitize(marked.parse(text || '', { breaks: true, gfm: true }));
+            }
+            return escapeHtml(text).replace(/\n/g, '<br>');
+        }
+
+        // Day / night theme
+        function setTheme(dark) {
+            const root = document.documentElement;
+            root.classList.add('theme-anim');
+            root.classList.toggle('dark', dark);
+            storageSet('darkMode', dark);
+            setTimeout(() => root.classList.remove('theme-anim'), 450);
+        }
+
+        function toggleDarkMode() {
+            setTheme(!document.documentElement.classList.contains('dark'));
+        }
+
         class ChatApp {
             constructor() {
                 this.isSending = false;
@@ -455,17 +805,40 @@
                 this.languages = ['en-US', 'hi-IN', 'ja-JP', 'ko-KR'];
                 this.languageLabels = {'en-US': 'EN', 'hi-IN': 'HI', 'ja-JP': 'JP', 'ko-KR': 'KO'};
                 this.languageNames = {'en-US': 'English', 'hi-IN': 'Hindi', 'ja-JP': 'Japanese', 'ko-KR': 'Korean'};
+                this.qrStream = null;
+                this.qrLoop = null;
+                this.typing = null;
+                this.thinkingTimers = [];
+
+                const savedLanguage = storageGet('language');
+                if (this.languages.includes(savedLanguage)) {
+                    this.language = savedLanguage;
+                }
+
                 this.initializeElements();
+                this.languageSelect.value = this.language;
+                this.initializeLanguageLabels();
                 this.initializeSpeechRecognition();
                 this.initializeMobileMenu();
                 this.attachEventListeners();
+                this.renderExistingMessages();
+                this.applyLanguageTexts();
+                this.reflectSpeechState();
                 this.updateButtonStates();
-                this.scrollToBottom();
+                this.scrollToBottom(false);
+                // Fonts and images change the page height after load, so scroll again once they are in
+                window.addEventListener('load', () => this.scrollToBottom(false));
+                if (document.fonts) document.fonts.ready.then(() => this.scrollToBottom(false));
+            }
+
+            t(key) {
+                return (T[this.language] || T['en-US'])[key];
             }
 
             initializeElements() {
                 this.pdfPreviewButton = document.getElementById('pdf-preview-button');
                 this.messagesContainer = document.getElementById('messages-container');
+                this.messagesInner = document.getElementById('messages-inner');
                 this.emptyState = document.getElementById('empty-state');
                 this.chatForm = document.getElementById('chat-form');
                 this.textInput = document.getElementById('text-input');
@@ -474,36 +847,52 @@
                 this.micButton = document.getElementById('mic-button');
                 this.sendButton = document.getElementById('send-button');
                 this.newChatButton = document.getElementById('new-chat');
-                this.chatItems = document.querySelectorAll('.chat-item');
-                this.deleteButtons = document.querySelectorAll('.delete-chat-button');
+                this.chatList = document.getElementById('chat-list');
+                this.chatSearch = document.getElementById('chat-search');
                 this.qrButton = document.getElementById('qr-button');
                 this.qrVideo = document.getElementById('qr-video');
+                this.qrOverlay = document.getElementById('qr-overlay');
+                this.qrCancel = document.getElementById('qr-cancel');
                 this.speechToggleButton = document.getElementById('speech-toggle-button');
+                this.themeToggle = document.getElementById('theme-toggle');
+                this.scrollBottomButton = document.getElementById('scroll-bottom');
                 this.sidebar = document.getElementById('sidebar');
                 this.sidebarOverlay = document.getElementById('sidebar-overlay');
                 this.mobileMenuButton = document.getElementById('mobile-menu-button');
                 this.closeSidebarButton = document.getElementById('close-sidebar-button');
                 this.languageSelect = document.getElementById('language-select');
+                this.toastContainer = document.getElementById('toast-container');
             }
 
             initializeMobileMenu() {
-                this.mobileMenuButton.addEventListener('click', () => {
+                const open = () => {
                     this.sidebar.classList.remove('-translate-x-full');
                     this.sidebarOverlay.classList.remove('hidden');
-                    this.mobileMenuButton.classList.add('hidden');
-                });
-
-                this.closeSidebarButton.addEventListener('click', () => {
+                };
+                const close = () => {
                     this.sidebar.classList.add('-translate-x-full');
                     this.sidebarOverlay.classList.add('hidden');
-                    this.mobileMenuButton.classList.remove('hidden');
-                });
+                };
+                this.mobileMenuButton.addEventListener('click', open);
+                this.closeSidebarButton.addEventListener('click', close);
+                this.sidebarOverlay.addEventListener('click', close);
+            }
 
-                this.sidebarOverlay.addEventListener('click', () => {
-                    this.sidebar.classList.add('-translate-x-full');
-                    this.sidebarOverlay.classList.add('hidden');
-                    this.mobileMenuButton.classList.remove('hidden');
-                });
+            // Full names on wide screens ("English (EN)"), just the code on phones ("EN")
+            initializeLanguageLabels() {
+                const small = window.matchMedia('(max-width: 639px)');
+                const apply = () => {
+                    [...this.languageSelect.options].forEach(option => {
+                        const code = this.languageLabels[option.value];
+                        option.textContent = small.matches ? code : `${this.languageNames[option.value]} (${code})`;
+                    });
+                };
+                apply();
+                small.addEventListener('change', apply);
+            }
+
+            setMicRecording(on) {
+                this.micButton.classList.toggle('is-recording', on);
             }
 
             initializeSpeechRecognition() {
@@ -525,12 +914,12 @@
                                 this.textInput.value = result.transcript;
                             }
                         }
+                        this.autosize();
                     };
                     this.recognition.onend = () => {
                         if (this.isRecording) {
                             this.isRecording = false;
-                            this.micButton.classList.remove('text-red-500', 'bg-red-50', 'dark:bg-red-900/20');
-                            this.micButton.classList.add('text-gray-400', 'hover:text-parihar-500', 'hover:bg-parihar-50', 'dark:hover:bg-parihar-900/20');
+                            this.setMicRecording(false);
                             this.updateButtonStates();
                             if (this.textInput.value.trim()) {
                                 this.handleSubmit(new Event('submit'));
@@ -540,8 +929,7 @@
                     this.recognition.onerror = (event) => {
                         console.error('Speech recognition error:', event.error);
                         this.isRecording = false;
-                        this.micButton.classList.remove('text-red-500', 'bg-red-50', 'dark:bg-red-900/20');
-                        this.micButton.classList.add('text-gray-400', 'hover:text-parihar-500', 'hover:bg-parihar-50', 'dark:hover:bg-parihar-900/20');
+                        this.setMicRecording(false);
                         this.updateButtonStates();
                         const errorMsg = {
                             'en-US': `Speech recognition error: ${event.error}. Please try again.`,
@@ -549,7 +937,7 @@
                             'ja-JP': `音声認識エラー: ${event.error}。もう一度お試しください。`,
                             'ko-KR': `음성 인식 오류: ${event.error}. 다시 시도해 주세요.`
                         };
-                        alert(errorMsg[this.language]);
+                        this.toast(errorMsg[this.language]);
                     };
                 } else {
                     console.warn('Speech recognition not supported in this browser.');
@@ -561,24 +949,28 @@
                         'ko-KR': '이 브라우저에서는 음성 입력이 지원되지 않습니다.'
                     };
                     this.micButton.title = noSupportMsg[this.language];
-                    this.micButton.classList.add('opacity-50', 'cursor-not-allowed');
                 }
             }
 
             attachEventListeners() {
                 this.pdfPreviewButton.addEventListener('click', () => {
-    window.open('/api/pdf-preview/', '_blank');
-});
+                    window.open('/api/pdf-preview/', '_blank');
+                });
                 this.chatForm.addEventListener('submit', (e) => this.handleSubmit(e));
                 this.fileButton.addEventListener('click', () => this.fileInput.click());
                 this.fileInput.addEventListener('change', (e) => this.handleFileUpload(e));
                 this.micButton.addEventListener('click', () => this.toggleRecording());
-                this.textInput.addEventListener('input', () => this.updateButtonStates());
+                this.textInput.addEventListener('input', () => {
+                    this.autosize();
+                    this.updateButtonStates();
+                });
                 this.qrButton.addEventListener('click', () => this.scanQRCode());
+                this.qrCancel.addEventListener('click', () => this.stopQrScan());
                 this.speechToggleButton.addEventListener('click', () => this.toggleSpeech());
                 this.languageSelect.addEventListener('change', () => this.changeLanguage());
+                this.themeToggle.addEventListener('click', toggleDarkMode);
                 this.textInput.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
+                    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
                         e.preventDefault();
                         this.handleSubmit(e);
                     }
@@ -589,48 +981,82 @@
                 this.newChatButton.addEventListener('click', () => {
                     window.location.href = '/chat/';
                 });
-                this.chatItems.forEach(item => {
-                    item.addEventListener('click', (e) => {
-                        if (!e.target.closest('.delete-chat-button')) {
-                            this.currentSessionId = item.dataset.sessionId;
-                            window.location.href = `/chat/?session_id=${this.currentSessionId}`;
-                        }
-                    });
-                });
-                this.deleteButtons.forEach(button => {
-                    button.addEventListener('click', (e) => {
+
+                // Sidebar: open a chat or delete it (works for chats added later too)
+                this.chatList.addEventListener('click', (e) => {
+                    const deleteButton = e.target.closest('.delete-chat-button');
+                    if (deleteButton) {
                         e.stopPropagation();
-                        const sessionId = button.dataset.sessionId;
-                        this.handleDeleteSession(sessionId);
-                    });
+                        this.handleDeleteSession(deleteButton.dataset.sessionId);
+                        return;
+                    }
+                    const item = e.target.closest('.chat-item');
+                    if (item) {
+                        this.currentSessionId = item.dataset.sessionId;
+                        window.location.href = `/chat/?session_id=${this.currentSessionId}`;
+                    }
+                });
+                this.chatSearch.addEventListener('input', () => this.filterChats());
+
+                // Message actions: copy / read aloud / skip typing
+                this.messagesContainer.addEventListener('click', (e) => {
+                    const button = e.target.closest('.act-btn');
+                    if (!button) {
+                        if (this.typing && e.target.closest('.msg-ai')) this.typing.finish();
+                        return;
+                    }
+                    const md = button.closest('.msg-body').querySelector('.md');
+                    if (button.classList.contains('act-copy')) this.copyMessage(md, button);
+                    if (button.classList.contains('act-speak')) this.speakMessage(md, button);
+                    if (button.classList.contains('act-skip') && this.typing) this.typing.finish();
+                });
+
+                this.messagesContainer.addEventListener('scroll', () => {
+                    this.scrollBottomButton.classList.toggle('hide', this.isNearBottom(200));
+                });
+                this.scrollBottomButton.addEventListener('click', () => this.scrollToBottom(true));
+
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && this.qrStream) this.stopQrScan();
                 });
             }
 
             changeLanguage() {
                 this.language = this.languageSelect.value;
-                const placeholders = {
-                    'en-US': 'Message MaintenanceMate AI...',
-                    'hi-IN': 'MaintenanceMate AI को संदेश भेजें...',
-                    'ja-JP': 'MaintenanceMate AIにメッセージ...',
-                    'ko-KR': 'MaintenanceMate AI에게 메시지 보내기...'
-                };
-                this.textInput.placeholder = placeholders[this.language];
                 if (this.recognition) {
                     this.recognition.lang = this.language;
                 }
-                localStorage.setItem('language', this.language);
+                storageSet('language', this.language);
+                this.applyLanguageTexts();
+                this.updateButtonStates();
+            }
+
+            applyLanguageTexts() {
+                document.querySelectorAll('[data-i18n]').forEach(el => {
+                    const text = this.t(el.dataset.i18n);
+                    if (text) el.textContent = text;
+                });
+                this.chatSearch.placeholder = this.t('search');
+                document.getElementById('qr-hint').textContent = this.t('qrHint');
+                this.qrCancel.querySelector('span').textContent = this.t('cancel');
+                document.querySelectorAll('.act-copy span').forEach(el => el.textContent = this.t('copy'));
+                document.querySelectorAll('.act-speak:not(.is-on) span').forEach(el => el.textContent = this.t('readAloud'));
+                this.formatTimes();
+                this.groupChatList();
             }
 
             toggleSpeech() {
                 this.speechEnabled = !this.speechEnabled;
-                this.speechToggleButton.classList.toggle('text-parihar-500', this.speechEnabled);
-                this.speechToggleButton.classList.toggle('bg-parihar-50', this.speechEnabled);
-                this.speechToggleButton.classList.toggle('dark:bg-parihar-900/20', this.speechEnabled);
-                this.speechToggleButton.title = this.speechEnabled ? 'Disable voice output' : 'Enable voice output';
-                this.speechToggleButton.innerHTML = `<i class="fas fa-volume-${this.speechEnabled ? 'up' : 'mute'}"></i>`;
+                this.reflectSpeechState();
                 if (!this.speechEnabled) {
                     window.speechSynthesis.cancel();
                 }
+            }
+
+            reflectSpeechState() {
+                this.speechToggleButton.classList.toggle('is-on', this.speechEnabled);
+                this.speechToggleButton.title = this.speechEnabled ? 'Disable voice output' : 'Enable voice output';
+                this.speechToggleButton.innerHTML = `<i class="fas fa-volume-${this.speechEnabled ? 'up' : 'mute'}"></i>`;
             }
 
             toggleRecording() {
@@ -641,7 +1067,7 @@
                         'ja-JP': 'このブラウザでは音声入力がサポートされていません。',
                         'ko-KR': '이 브라우저에서는 음성 입력이 지원되지 않습니다.'
                     };
-                    alert(noSupportMsg[this.language]);
+                    this.toast(noSupportMsg[this.language]);
                     return;
                 }
                 if (this.isRecording) {
@@ -649,17 +1075,16 @@
                 } else {
                     if (this.isSending) return;
                     this.isRecording = true;
-                    this.micButton.classList.remove('text-gray-400', 'hover:text-parihar-500', 'hover:bg-parihar-50', 'dark:hover:bg-parihar-900/20');
-                    this.micButton.classList.add('text-red-500', 'bg-red-50', 'dark:bg-red-900/20');
+                    this.setMicRecording(true);
                     this.textInput.value = '';
+                    this.autosize();
                     this.updateButtonStates();
                     try {
                         this.recognition.start();
                     } catch (error) {
                         console.error('Error starting speech recognition:', error);
                         this.isRecording = false;
-                        this.micButton.classList.remove('text-red-500', 'bg-red-50', 'dark:bg-red-900/20');
-                        this.micButton.classList.add('text-gray-400', 'hover:text-parihar-500', 'hover:bg-parihar-50', 'dark:hover:bg-parihar-900/20');
+                        this.setMicRecording(false);
                         this.updateButtonStates();
                         const errorMsg = {
                             'en-US': `Failed to start voice input: ${error.message}`,
@@ -667,7 +1092,7 @@
                             'ja-JP': `音声入力の開始に失敗: ${error.message}`,
                             'ko-KR': `음성 입력을 시작하지 못했습니다: ${error.message}`
                         };
-                        alert(errorMsg[this.language]);
+                        this.toast(errorMsg[this.language]);
                     }
                 }
             }
@@ -675,25 +1100,25 @@
             async scanQRCode() {
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                    this.qrStream = stream;
                     this.qrVideo.srcObject = stream;
-                    this.qrVideo.classList.remove('hidden');
-                    this.qrVideo.classList.add('fixed', 'inset-0', 'w-full', 'h-full', 'object-cover', 'z-50');
+                    this.qrOverlay.classList.remove('hidden');
+                    requestAnimationFrame(() => this.qrOverlay.classList.add('open'));
                     const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
-                    const scanLoop = setInterval(async () => {
+                    const context = canvas.getContext('2d', { willReadFrequently: true });
+                    this.qrLoop = setInterval(async () => {
+                        if (!this.qrVideo.videoWidth) return;  // camera not ready yet
                         canvas.width = this.qrVideo.videoWidth;
                         canvas.height = this.qrVideo.videoHeight;
                         context.drawImage(this.qrVideo, 0, 0, canvas.width, canvas.height);
                         const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
                         const code = jsQR(imageData.data, canvas.width, canvas.height);
                         if (code && code.data) {
-                            clearInterval(scanLoop);
-                            this.qrVideo.classList.add('hidden');
-                            this.qrVideo.classList.remove('fixed', 'inset-0', 'w-full', 'h-full', 'object-cover', 'z-50');
-                            this.qrVideo.srcObject.getTracks().forEach(track => track.stop());
+                            this.stopQrScan();
                             const driveUrl = code.data;
                             const directUrl = this.convertDriveUrlToDirect(driveUrl);
                             if (directUrl) {
+                                this.toast(this.t('qrLoading'), 'info');
                                 const fileBlob = await this.fetchPdfFromBackend(driveUrl);
                                 if (fileBlob) {
                                     const base64 = await this.blobToBase64(fileBlob);
@@ -710,20 +1135,33 @@
                                     'ja-JP': '❌ 無効なGoogle Drive QRコード。',
                                     'ko-KR': '❌ 잘못된 Google Drive QR 코드입니다.'
                                 };
-                                alert(errorMsg[this.language]);
+                                this.toast(errorMsg[this.language]);
                             }
                         }
                     }, 500);
                 } catch (error) {
                     console.error("Camera access error:", error);
+                    this.stopQrScan();
                     const errorMsg = {
                         'en-US': '❌ Failed to access camera.',
                         'hi-IN': '❌ कैमरा तक पहुंचने में विफल।',
                         'ja-JP': '❌ カメラへのアクセスに失敗しました。',
                         'ko-KR': '❌ 카메라에 접근하지 못했습니다.'
                     };
-                    alert(errorMsg[this.language]);
+                    this.toast(errorMsg[this.language]);
                 }
+            }
+
+            stopQrScan() {
+                clearInterval(this.qrLoop);
+                this.qrLoop = null;
+                if (this.qrStream) {
+                    this.qrStream.getTracks().forEach(track => track.stop());
+                    this.qrStream = null;
+                }
+                this.qrVideo.srcObject = null;
+                this.qrOverlay.classList.remove('open');
+                setTimeout(() => this.qrOverlay.classList.add('hidden'), 300);
             }
 
             convertDriveUrlToDirect(url) {
@@ -752,13 +1190,7 @@
                             name: result.name
                         });
                     } else {
-                        const errorMsg = {
-                            'en-US': `❌ ${result.error}`,
-                            'hi-IN': `❌ ${result.error}`,
-                            'ja-JP': `❌ ${result.error}`,
-                            'ko-KR': `❌ ${result.error}`
-                        };
-                        alert(errorMsg[this.language]);
+                        this.toast(`❌ ${result.error}`);
                     }
                 } catch (err) {
                     const errorMsg = {
@@ -767,7 +1199,7 @@
                         'ja-JP': '❌ バックエンドからのダウンロードに失敗しました。',
                         'ko-KR': '❌ 백엔드에서 다운로드하지 못했습니다.'
                     };
-                    alert(errorMsg[this.language]);
+                    this.toast(errorMsg[this.language]);
                     console.error(err);
                 }
             }
@@ -791,22 +1223,26 @@
                     'ja-JP': 'このチャットセッションを削除しますか？',
                     'ko-KR': '이 채팅 세션을 삭제하시겠습니까?'
                 };
-                if (!confirm(confirmMsg[this.language])) return;
+                if (!(await this.confirmDialog(confirmMsg[this.language]))) return;
                 try {
                     const response = await fetch(`/api/chat/delete/${sessionId}/`, {
                         method: 'DELETE',
                     });
                     const data = await response.json();
                     if (data.success) {
-                        if (this.currentSessionId === sessionId) {
+                        if (String(this.currentSessionId) === String(sessionId)) {
                             window.location.href = '/chat/';
                         } else {
-                            const chatItem = document.querySelector(`.chat-item[data-session-id="${sessionId}"]`);
+                            const chatItem = this.chatList.querySelector(`.chat-item[data-session-id="${sessionId}"]`);
                             if (chatItem) {
                                 chatItem.style.transform = 'translateX(-100%)';
                                 chatItem.style.opacity = '0';
-                                setTimeout(() => chatItem.remove(), 300);
+                                setTimeout(() => {
+                                    chatItem.remove();
+                                    this.groupChatList();
+                                }, 300);
                             }
+                            this.toast(this.t('deleted'), 'success');
                         }
                     } else {
                         const errorMsg = {
@@ -815,7 +1251,7 @@
                             'ja-JP': `エラー: ${data.error}`,
                             'ko-KR': `오류: ${data.error}`
                         };
-                        alert(errorMsg[this.language]);
+                        this.toast(errorMsg[this.language]);
                     }
                 } catch (error) {
                     console.error('Error deleting session:', error);
@@ -825,7 +1261,7 @@
                         'ja-JP': 'チャットセッションの削除に失敗しました。もう一度お試しください。',
                         'ko-KR': '채팅 세션을 삭제하지 못했습니다. 다시 시도해 주세요.'
                     };
-                    alert(errorMsg[this.language]);
+                    this.toast(errorMsg[this.language]);
                 }
             }
 
@@ -850,16 +1286,25 @@
 
             async sendMessage(text = null, file = null) {
                 if (this.isSending) return;
+                if (this.typing) this.typing.finish();
                 if (this.emptyState) {
-                    this.emptyState.style.display = 'none';
+                    this.emptyState.remove();
+                    this.emptyState = null;
                 }
                 this.isSending = true;
+
+                // Show the user's message right away
+                const userMessage = this.appendUserMessage(text, file);
+                this.textInput.value = '';
+                this.autosize();
                 this.updateButtonStates();
-                const loadingIndicator = document.querySelector('.loading-indicator');
-                if (loadingIndicator) {
-                    loadingIndicator.classList.remove('hidden');
-                    this.scrollToBottom();
-                }
+                this.sendButton.classList.remove('fly');
+                void this.sendButton.offsetWidth;
+                this.sendButton.classList.add('fly');
+                this.showThinking(Boolean(file) || !this.currentSessionId);
+                this.scrollToBottom(true);
+
+                let failed = false;
                 try {
                     const formData = new FormData();
                     if (text) {
@@ -881,50 +1326,383 @@
                         body: formData
                     });
                     const data = await response.json();
+                    this.hideThinking();
                     if (data.success) {
+                        this.currentSessionId = data.session_id;
+                        history.replaceState(null, '', `/chat/?session_id=${data.session_id}`);
+                        this.upsertChatItem(data.session_id, text);
                         if (data.response && this.speechEnabled) {
-                            speakText(data.response, this.speechEnabled, this.language);
+                            speakText(data.tts_response || data.response, this.speechEnabled, this.language);
                         }
-                        window.location.href = this.currentSessionId ? `/chat/?session_id=${this.currentSessionId}` : `/chat/?session_id=${data.session_id}`;
+                        this.appendAiMessage(data.response || '', true);
                     } else {
+                        failed = true;
                         const errorMsg = {
                             'en-US': `Error: ${data.error}`,
                             'hi-IN': `त्रुटि: ${data.error}`,
                             'ja-JP': `エラー: ${data.error}`,
                             'ko-KR': `오류: ${data.error}`
                         };
-                        alert(errorMsg[this.language]);
+                        this.toast(errorMsg[this.language]);
                     }
                 } catch (error) {
                     console.error('Error:', error);
+                    failed = true;
+                    this.hideThinking();
                     const errorMsg = {
                         'en-US': 'Failed to send message. Please try again.',
                         'hi-IN': 'संदेश भेजने में विफल। कृपया फिर से प्रयास करें।',
                         'ja-JP': 'メッセージの送信に失敗しました。もう一度お試しください。',
                         'ko-KR': '메시지를 보내지 못했습니다. 다시 시도해 주세요.'
                     };
-                    alert(errorMsg[this.language]);
+                    this.toast(errorMsg[this.language]);
                 } finally {
-                    const loadingIndicator = document.querySelector('.loading-indicator');
-                    if (loadingIndicator) {
-                        loadingIndicator.classList.add('hidden');
+                    if (failed) {
+                        // The server did not keep this message, so take it back out and restore the text
+                        userMessage.remove();
+                        if (text) {
+                            this.textInput.value = text;
+                            this.autosize();
+                        }
                     }
                     this.isSending = false;
-                    this.textInput.value = '';
                     this.updateButtonStates();
-                    this.scrollToBottom();
-                    this.deleteButtons = document.querySelectorAll('.delete-chat-button');
-                    this.deleteButtons.forEach(button => {
-                        if (!button.hasListener) {
-                            button.hasListener = true;
-                            button.addEventListener('click', (e) => {
-                                e.stopPropagation();
-                                const sessionId = button.dataset.sessionId;
-                                this.handleDeleteSession(sessionId);
-                            });
-                        }
-                    });
+                    this.scrollToBottom(true);
                 }
+            }
+
+            // ---------- Message rendering ----------
+            fileBlockHtml(file) {
+                if (!file) return '';
+                if ((file.mimeType || '').startsWith('image/')) {
+                    return `<img src="data:${escapeHtml(file.mimeType)};base64,${file.data}" alt="Uploaded content" class="bubble-img">`;
+                }
+                const isPdf = file.mimeType === 'application/pdf';
+                return `<div class="file-chip">
+                            <span class="file-icon"><i class="fas ${isPdf ? 'fa-file-pdf' : 'fa-file'}"></i></span>
+                            <div><p class="file-name">${escapeHtml(file.name || (isPdf ? this.t('pdfName') : this.t('fileName')))}</p>
+                            <p class="file-sub">${this.t('attached')}</p></div>
+                        </div>`;
+            }
+
+            appendUserMessage(text, file) {
+                const el = document.createElement('div');
+                el.className = 'msg msg-user';
+                el.innerHTML = `
+                    <div class="msg-body">
+                        <div class="bubble-user">
+                            ${text ? `<div class="user-text">${escapeHtml(text)}</div>` : ''}
+                            ${this.fileBlockHtml(file)}
+                        </div>
+                        <div class="msg-meta"><time class="msg-time">${this.formatClock(new Date())}</time></div>
+                    </div>`;
+                this.messagesInner.appendChild(el);
+                return el;
+            }
+
+            appendAiMessage(text, animate) {
+                const el = document.createElement('div');
+                el.className = 'msg msg-ai';
+                el.innerHTML = `
+                    <div class="avatar-ai"><img src="${AI_LOGO}" alt=""></div>
+                    <div class="msg-body">
+                        <div class="msg-meta"><span class="msg-name">MaintenanceMateAI</span><time class="msg-time">${this.formatClock(new Date())}</time></div>
+                        <div class="bubble-ai"><div class="md"></div></div>
+                        <div class="msg-actions">
+                            <button type="button" class="act-btn act-copy"><i class="far fa-copy"></i><span>${this.t('copy')}</span></button>
+                            <button type="button" class="act-btn act-speak"><i class="fas fa-volume-up"></i><span>${this.t('readAloud')}</span></button>
+                        </div>
+                    </div>`;
+                this.messagesInner.appendChild(el);
+                const md = el.querySelector('.md');
+                md._raw = text;
+                if (animate && !reduceMotion) {
+                    this.typeOut(md, text, el.querySelector('.msg-actions'));
+                } else {
+                    md.innerHTML = renderMarkdown(text);
+                }
+                return el;
+            }
+
+            renderExistingMessages() {
+                document.querySelectorAll('.md[data-render-md]').forEach(md => {
+                    md._raw = md.textContent;
+                    md.innerHTML = renderMarkdown(md._raw);
+                    md.removeAttribute('data-render-md');
+                });
+            }
+
+            // Reveal the reply word by word (finishes within ~4 seconds, whatever the length)
+            typeOut(md, text, actions) {
+                const tokens = text.split(/(\s+)/);
+                const tickMs = 28;
+                const perTick = Math.max(1, Math.ceil(tokens.length / (4000 / tickMs)));
+                let shown = 0;
+                let timer = null;
+
+                const skip = document.createElement('button');
+                skip.type = 'button';
+                skip.className = 'act-btn act-skip';
+                skip.innerHTML = `<i class="fas fa-forward"></i><span>${this.t('skip')}</span>`;
+                actions.appendChild(skip);
+                actions.classList.add('show');
+                md.classList.add('typing');
+
+                const finish = () => {
+                    clearInterval(timer);
+                    md.innerHTML = renderMarkdown(text);
+                    md.classList.remove('typing');
+                    skip.remove();
+                    actions.classList.remove('show');
+                    if (this.typing && this.typing.md === md) this.typing = null;
+                    if (this.isNearBottom(160)) this.scrollToBottom(false);
+                };
+
+                this.typing = { md, finish };
+                timer = setInterval(() => {
+                    shown = Math.min(tokens.length, shown + perTick);
+                    const stick = this.isNearBottom(120);
+                    let partial = tokens.slice(0, shown).join('').trimEnd();
+                    const insideCode = (partial.match(/```/g) || []).length % 2 === 1;
+                    // Close a half-typed **bold** so it shows as bold instead of raw asterisks
+                    if (!insideCode && (partial.match(/\*\*/g) || []).length % 2 === 1) partial += '**';
+                    md.innerHTML = renderMarkdown(insideCode ? partial : `${partial} <span class="type-caret"></span>`);
+                    if (stick) this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+                    if (shown >= tokens.length) finish();
+                }, tickMs);
+            }
+
+            // ---------- Thinking animation ----------
+            showThinking(readingDocument) {
+                this.hideThinking();
+                const stages = readingDocument ? this.t('stagesDoc') : this.t('stages');
+                const el = document.createElement('div');
+                el.className = 'msg msg-ai';
+                el.id = 'thinking-msg';
+                el.innerHTML = `
+                    <div class="avatar-ai orb"><img src="${AI_LOGO}" alt=""></div>
+                    <div class="msg-body">
+                        <div class="msg-meta"><span class="msg-name">MaintenanceMateAI</span></div>
+                        <div class="bubble-ai thinking-bubble">
+                            <span class="think-text">${escapeHtml(stages[0])}</span>
+                            <span class="think-dots"><i></i><i></i><i></i></span>
+                            <span class="think-timer">0s</span>
+                        </div>
+                    </div>`;
+                this.messagesInner.appendChild(el);
+
+                const textEl = el.querySelector('.think-text');
+                const timerEl = el.querySelector('.think-timer');
+                const started = Date.now();
+                let stage = 0;
+                const setText = (value) => {
+                    textEl.classList.add('swap');
+                    setTimeout(() => {
+                        textEl.textContent = value;
+                        textEl.classList.remove('swap');
+                    }, 250);
+                };
+                this.thinkingTimers.push(setInterval(() => {
+                    timerEl.textContent = `${Math.floor((Date.now() - started) / 1000)}s`;
+                }, 1000));
+                this.thinkingTimers.push(setInterval(() => {
+                    const seconds = (Date.now() - started) / 1000;
+                    if (seconds > 20) {
+                        setText(this.t('slow'));
+                    } else if (stage < stages.length - 1) {
+                        stage += 1;
+                        setText(stages[stage]);
+                    }
+                }, 3200));
+            }
+
+            hideThinking() {
+                this.thinkingTimers.forEach(clearInterval);
+                this.thinkingTimers = [];
+                const el = document.getElementById('thinking-msg');
+                if (el) el.remove();
+            }
+
+            // ---------- Message actions ----------
+            async copyMessage(md, button) {
+                const text = md._raw || md.innerText;
+                try {
+                    await navigator.clipboard.writeText(text);
+                } catch (e) {
+                    const area = document.createElement('textarea');
+                    area.value = text;
+                    document.body.appendChild(area);
+                    area.select();
+                    document.execCommand('copy');
+                    area.remove();
+                }
+                const icon = button.querySelector('i');
+                icon.className = 'fas fa-check';
+                button.classList.add('is-on');
+                setTimeout(() => {
+                    icon.className = 'far fa-copy';
+                    button.classList.remove('is-on');
+                }, 1600);
+                this.toast(this.t('copied'), 'success');
+            }
+
+            speakMessage(md, button) {
+                if (!window.speechSynthesis) return;
+                const wasOn = button.classList.contains('is-on');
+                window.speechSynthesis.cancel();
+                document.querySelectorAll('.act-speak.is-on').forEach(b => this.setSpeakButton(b, false));
+                if (wasOn) return;
+                const utterance = new SpeechSynthesisUtterance(md.innerText);
+                utterance.lang = this.language;
+                utterance.onend = () => this.setSpeakButton(button, false);
+                utterance.onerror = () => this.setSpeakButton(button, false);
+                this.setSpeakButton(button, true);
+                window.speechSynthesis.speak(utterance);
+            }
+
+            setSpeakButton(button, on) {
+                button.classList.toggle('is-on', on);
+                button.querySelector('i').className = on ? 'fas fa-stop' : 'fas fa-volume-up';
+                button.querySelector('span').textContent = on ? this.t('stop') : this.t('readAloud');
+            }
+
+            // ---------- Sidebar ----------
+            upsertChatItem(sessionId, text) {
+                let item = this.chatList.querySelector(`.chat-item[data-session-id="${sessionId}"]`);
+                const nowIso = new Date().toISOString();
+                if (!item) {
+                    const title = text ? text.split(/\s+/).slice(0, 6).join(' ').slice(0, 50) : 'New Chat';
+                    item = document.createElement('div');
+                    item.className = 'chat-item';
+                    item.dataset.sessionId = sessionId;
+                    item.dataset.title = title.toLowerCase();
+                    item.innerHTML = `
+                        <div class="chat-icon"><i class="far fa-message"></i></div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="chat-title font-medium truncate text-sm">${escapeHtml(title)}</h3>
+                            <span class="chat-time text-xs"></span>
+                        </div>
+                        <button class="delete-chat-button" data-session-id="${sessionId}" title="Delete chat">
+                            <i class="fas fa-trash-alt text-xs"></i>
+                        </button>`;
+                    item.style.animation = 'msgIn .45s cubic-bezier(.2,.8,.2,1) both';
+                }
+                this.chatList.querySelectorAll('.chat-item.is-active').forEach(i => i.classList.remove('is-active'));
+                item.classList.add('is-active');
+                item.dataset.updated = nowIso;
+                const timeEl = item.querySelector('.chat-time');
+                timeEl.dataset.time = nowIso;
+                this.chatList.prepend(item);
+                this.formatTimes();
+                this.groupChatList();
+            }
+
+            groupChatList() {
+                this.chatList.querySelectorAll('.chat-group-label').forEach(label => label.remove());
+                const items = [...this.chatList.querySelectorAll('.chat-item')];
+                document.getElementById('no-chats').classList.toggle('hidden', items.length > 0);
+                const startOfToday = new Date();
+                startOfToday.setHours(0, 0, 0, 0);
+                const day = 24 * 60 * 60 * 1000;
+                let lastGroup = null;
+                items.forEach(item => {
+                    const updated = new Date(item.dataset.updated);
+                    let group = 'older';
+                    if (updated >= startOfToday) group = 'today';
+                    else if (updated >= startOfToday - day) group = 'yesterday';
+                    else if (updated >= startOfToday - 7 * day) group = 'week';
+                    item.dataset.group = group;
+                    if (group !== lastGroup) {
+                        const label = document.createElement('div');
+                        label.className = 'chat-group-label';
+                        label.dataset.group = group;
+                        label.textContent = this.t(group);
+                        item.before(label);
+                        lastGroup = group;
+                    }
+                });
+                this.filterChats();
+            }
+
+            filterChats() {
+                const query = this.chatSearch.value.trim().toLowerCase();
+                let visibleCount = 0;
+                const visibleGroups = new Set();
+                this.chatList.querySelectorAll('.chat-item').forEach(item => {
+                    const match = !query || (item.dataset.title || '').includes(query);
+                    item.classList.toggle('hidden', !match);
+                    if (match) {
+                        visibleCount += 1;
+                        visibleGroups.add(item.dataset.group);
+                    }
+                });
+                this.chatList.querySelectorAll('.chat-group-label').forEach(label => {
+                    label.classList.toggle('hidden', !visibleGroups.has(label.dataset.group));
+                });
+                document.getElementById('no-results').classList.toggle('hidden', !query || visibleCount > 0);
+            }
+
+            formatClock(date) {
+                return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+
+            formatTimes() {
+                const today = new Date().toDateString();
+                document.querySelectorAll('.msg-time[data-time], .chat-time[data-time]').forEach(el => {
+                    const date = new Date(el.dataset.time);
+                    if (isNaN(date)) return;
+                    if (el.classList.contains('chat-time') && date.toDateString() !== today) {
+                        el.textContent = date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+                    } else {
+                        el.textContent = this.formatClock(date);
+                    }
+                });
+            }
+
+            // ---------- Toasts + dialog ----------
+            toast(message, type = 'error') {
+                const icons = { error: 'fa-circle-exclamation', success: 'fa-circle-check', info: 'fa-circle-info' };
+                const el = document.createElement('div');
+                el.className = `toast ${type} pointer-events-auto`;
+                el.innerHTML = `<i class="fas ${icons[type] || icons.info} toast-icon"></i><span></span>`;
+                el.querySelector('span').textContent = message;
+                this.toastContainer.appendChild(el);
+                setTimeout(() => {
+                    el.classList.add('out');
+                    setTimeout(() => el.remove(), 260);
+                }, type === 'error' ? 5000 : 2600);
+            }
+
+            confirmDialog(message) {
+                const modal = document.getElementById('confirm-modal');
+                const ok = document.getElementById('confirm-ok');
+                const cancel = document.getElementById('confirm-cancel');
+                document.getElementById('confirm-title').textContent = this.t('deleteTitle');
+                document.getElementById('confirm-text').textContent = message;
+                ok.textContent = this.t('del');
+                cancel.textContent = this.t('cancel');
+                modal.classList.remove('hidden');
+                requestAnimationFrame(() => modal.classList.add('open'));
+                ok.focus();
+                return new Promise(resolve => {
+                    const close = (result) => {
+                        modal.classList.remove('open');
+                        setTimeout(() => modal.classList.add('hidden'), 200);
+                        ok.onclick = cancel.onclick = modal.onclick = document.onkeydown = null;
+                        resolve(result);
+                    };
+                    ok.onclick = () => close(true);
+                    cancel.onclick = () => close(false);
+                    modal.onclick = (e) => { if (e.target === modal) close(false); };
+                    document.onkeydown = (e) => { if (e.key === 'Escape') close(false); };
+                });
+            }
+
+            // ---------- Composer ----------
+            autosize() {
+                this.textInput.style.height = 'auto';
+                if (!this.textInput.value) return;  // empty: stay one line (a long placeholder must not grow it)
+                this.textInput.style.height = `${Math.min(this.textInput.scrollHeight, 160)}px`;
             }
 
             updateButtonStates() {
@@ -934,11 +1712,6 @@
                 this.qrButton.disabled = this.isSending || this.isRecording;
                 this.sendButton.disabled = this.isSending || !hasText || this.isRecording;
                 this.textInput.disabled = this.isSending || this.isRecording;
-                if (this.isSending) {
-                    this.sendButton.classList.add('opacity-50', 'cursor-not-allowed');
-                } else {
-                    this.sendButton.classList.remove('opacity-50', 'cursor-not-allowed');
-                }
                 const placeholders = {
                     'en-US': {
                         recording: 'Listening...',
@@ -968,10 +1741,18 @@
                         : placeholders[this.language].default;
             }
 
-            scrollToBottom() {
+            isNearBottom(threshold) {
+                const c = this.messagesContainer;
+                return c.scrollHeight - c.scrollTop - c.clientHeight < threshold;
+            }
+
+            scrollToBottom(smooth = true) {
                 setTimeout(() => {
-                    this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
-                }, 100);
+                    this.messagesContainer.scrollTo({
+                        top: this.messagesContainer.scrollHeight,
+                        behavior: smooth && !reduceMotion ? 'smooth' : 'auto'
+                    });
+                }, 60);
             }
 
             async fileToBase64(file) {
@@ -991,32 +1772,8 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            const app = new ChatApp();
-            const savedLanguage = localStorage.getItem('language');
-            if (savedLanguage && ['en-US', 'hi-IN', 'ja-JP'].includes(savedLanguage)) {
-                app.language = savedLanguage;
-                app.languageSelect.value = savedLanguage;
-                const placeholders = {
-                    'en-US': 'Message MaintenanceMate AI...',
-                    'hi-IN': 'MaintenanceMate AI को संदेश भेजें...',
-                    'ja-JP': 'MaintenanceMate AIにメッセージ...',
-                    'ko-KR': 'MaintenanceMate AI에게 메시지 보내기...'
-                };
-                app.textInput.placeholder = placeholders[savedLanguage];
-                if (app.recognition) {
-                    app.recognition.lang = savedLanguage;
-                }
-            }
+            window.chatApp = new ChatApp();
         });
-
-        function toggleDarkMode() {
-            document.documentElement.classList.toggle('dark');
-            localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
-        }
-
-        if (localStorage.getItem('darkMode') === 'true') {
-            document.documentElement.classList.add('dark');
-        }
     </script>
 </body>
 </html>

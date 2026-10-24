@@ -18,5 +18,15 @@ class ChatMessage(models.Model):
     file_mime_type = models.CharField(max_length=100, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # Gemini token usage for the request that produced this AI reply (empty on user messages)
+    prompt_tokens = models.PositiveIntegerField(null=True, blank=True)
+    output_tokens = models.PositiveIntegerField(null=True, blank=True)
+    thinking_tokens = models.PositiveIntegerField(null=True, blank=True)
+    total_tokens = models.PositiveIntegerField(null=True, blank=True)
+    latency_seconds = models.FloatField(null=True, blank=True)
+    model_name = models.CharField(max_length=100, blank=True, null=True)     # model that answered
+    api_key_label = models.CharField(max_length=20, blank=True, null=True)   # "key1", "key2", ... (never the key)
+    attempts = models.PositiveSmallIntegerField(null=True, blank=True)       # >1 means a fallback was used
+
     def __str__(self):
         return f"{'User' if self.is_user else 'AI'}: {self.text or 'File'}"

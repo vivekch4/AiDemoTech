@@ -1,0 +1,74 @@
+2026-09-29 17:08:00 [GEMINI] SENDING model=gemini-2.5-flash-lite session=155 history_messages=0 has_file=True text_chars=22
+2026-09-29 17:08:01 [GEMINI] model=gemini-2.5-flash-lite session=155 status=error latency=0.69s prompt_tokens=0 output_tokens=0 total_tokens=0 calls_last_minute=1 error='404 This model models/gemini-2.5-flash-lite is no longer available to new users. Please update your code to use models/gemini-3.5-flash-lite for the latest features and improvements. We recommend you to use the Interactions API (https://ai.google.dev/gemini-api/docs/get-started).'
+2026-09-29 17:08:57 [GEMINI] SENDING model=gemini-3.5-flash-lite session=156 history_messages=0 has_file=True text_chars=22
+2026-09-29 17:09:01 [GEMINI] model=gemini-3.5-flash-lite session=156 status=success latency=3.90s prompt_tokens=5257 output_tokens=48 total_tokens=5305 calls_last_minute=1
+2026-09-29 17:12:34 [GEMINI] SENDING model=gemini-3.5-flash session=157 history_messages=0 has_file=True text_chars=22
+2026-09-29 17:12:39 [GEMINI] model=gemini-3.5-flash session=157 status=error latency=4.41s prompt_tokens=0 output_tokens=0 total_tokens=0 calls_last_minute=1 error='503 This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.'
+2026-09-29 17:15:09 [GEMINI] SENDING model=gemini-3.7-flash session=158 history_messages=0 has_file=True text_chars=22
+2026-09-29 17:15:22 [GEMINI] model=gemini-3.7-flash session=158 status=success latency=13.34s prompt_tokens=5257 output_tokens=78 total_tokens=5687 calls_last_minute=1
+2026-09-29 17:54:43 [GEMINI] SENDING model=gemini-3.5-flash session=159 history_messages=0 attempt=1/3
+2026-09-29 17:54:46 [GEMINI] model=gemini-3.5-flash session=159 status=error latency=3.16s prompt_tokens=0 output_tokens=0 total_tokens=0 calls_last_minute=1 error='503 This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.'
+2026-09-29 17:56:00 [GEMINI] SENDING model=gemini-3.6-flash session=160 history_messages=0 attempt=1/3
+2026-09-29 17:56:19 [GEMINI] model=gemini-3.6-flash session=160 status=error latency=18.95s prompt_tokens=0 output_tokens=0 total_tokens=0 calls_last_minute=1 error='503 This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.'
+2026-09-29 17:57:33 [GEMINI] SENDING model=gemini-3.7-flash session=161 history_messages=0 attempt=1/3
+2026-09-29 17:57:37 [GEMINI] model=gemini-3.7-flash session=161 status=error latency=3.41s prompt_tokens=0 output_tokens=0 total_tokens=0 calls_last_minute=1 error='503 This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.'
+2026-09-29 17:58:46 [GEMINI] SENDING model=gemini-3.7-flash session=162 history_messages=0 has_file=True text_chars=19
+2026-09-29 17:59:31 [GEMINI] model=gemini-3.7-flash session=162 status=success latency=44.89s prompt_tokens=5256 output_tokens=84 total_tokens=5564 calls_last_minute=1
+2026-10-09 13:17:58 [GEMINI] SENDING model=gemini-3.7-flash session=163 history_messages=0 has_file=True text_chars=22
+2026-10-09 13:18:18 [GEMINI] model=gemini-3.7-flash session=163 status=error latency=20.36s prompt_tokens=0 output_tokens=0 total_tokens=0 calls_last_minute=1 error='503 This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.'
+2026-10-09 13:19:33 [GEMINI] SENDING model=gemini-3.6-flash session=164 history_messages=0 has_file=True text_chars=22
+2026-10-09 13:19:41 [GEMINI] model=gemini-3.6-flash session=164 status=success latency=7.54s prompt_tokens=5257 output_tokens=41 total_tokens=5577 calls_last_minute=1
+2026-10-09 13:20:33 [GEMINI] SENDING model=gemini-3.6-flash session=164 history_messages=2 has_file=False text_chars=16
+2026-10-09 13:20:41 [GEMINI] model=gemini-3.6-flash session=164 status=error latency=8.11s prompt_tokens=0 output_tokens=0 total_tokens=0 calls_last_minute=1 error='503 This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.'
+2026-10-09 13:25:09 [GEMINI] SENDING model=gemini-3.6-flash session=164 history_messages=2 has_file=False text_chars=19
+2026-10-09 13:25:15 [GEMINI] model=gemini-3.6-flash session=164 status=success latency=5.61s prompt_tokens=5304 output_tokens=66 total_tokens=5881 calls_last_minute=1
+2026-10-09 13:25:37 [GEMINI] SENDING model=gemini-3.6-flash session=164 history_messages=4 has_file=False text_chars=10
+2026-10-09 13:25:42 [GEMINI] model=gemini-3.6-flash session=164 status=success latency=4.16s prompt_tokens=5374 output_tokens=70 total_tokens=5743 calls_last_minute=2
+2026-10-09 13:26:03 [GEMINI] SENDING model=gemini-3.6-flash session=164 history_messages=6 has_file=False text_chars=8
+2026-10-09 13:26:08 [GEMINI] model=gemini-3.6-flash session=164 status=success latency=4.78s prompt_tokens=5448 output_tokens=58 total_tokens=5885 calls_last_minute=3
+2026-10-09 15:37:25 [GEMINI] SENDING model=gemini-3.6-flash key=key1 session=test attempt=1 history_messages=0
+2026-10-09 15:37:27 [GEMINI] model=gemini-3.6-flash key=key1 session=test status=success latency=2.26s prompt_tokens=8 output_tokens=1 total_tokens=96 calls_last_minute=1
+2026-10-09 16:25:59 [GEMINI] SENDING model=gemini-3.6-flash key=key1 session=165 attempt=1 history_messages=0
+2026-10-09 16:26:32 [GEMINI] model=gemini-3.6-flash key=key1 session=165 status=success latency=32.89s prompt_tokens=5256 output_tokens=61 total_tokens=5846 calls_last_minute=1
+2026-10-09 16:27:03 [GEMINI] SENDING model=gemini-3.6-flash key=key1 session=165 attempt=1 history_messages=2
+2026-10-09 16:27:10 [GEMINI] model=gemini-3.6-flash key=key1 session=165 status=success latency=7.20s prompt_tokens=5325 output_tokens=134 total_tokens=5949 calls_last_minute=1
+2026-10-09 16:28:11 [GEMINI] SENDING model=gemini-3.6-flash key=key1 session=165 attempt=1 history_messages=4
+2026-10-09 16:28:18 [GEMINI] model=gemini-3.6-flash key=key1 session=165 status=model_busy latency=6.92s prompt_tokens=0 output_tokens=0 total_tokens=0 calls_last_minute=1 error='503 This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.'
+2026-10-09 16:28:18 [GEMINI] SENDING model=gemini-3.5-flash key=key1 session=165 attempt=2 history_messages=4
+2026-10-09 16:28:24 [GEMINI] model=gemini-3.5-flash key=key1 session=165 status=success latency=6.12s prompt_tokens=5473 output_tokens=119 total_tokens=5952 calls_last_minute=2
+2026-10-09 16:28:24 [GEMINI] FALLBACK used model=gemini-3.5-flash key=key1 after 2 attempts
+2026-10-09 16:29:04 [GEMINI] SENDING model=gemini-3.5-flash key=key1 session=165 attempt=1 history_messages=6
+2026-10-09 16:29:10 [GEMINI] model=gemini-3.5-flash key=key1 session=165 status=success latency=5.52s prompt_tokens=5601 output_tokens=212 total_tokens=6205 calls_last_minute=3
+2026-10-09 16:30:01 [GEMINI] SENDING model=gemini-3.6-flash key=key1 session=165 attempt=1 history_messages=8
+2026-10-09 16:30:10 [GEMINI] model=gemini-3.6-flash key=key1 session=165 status=success latency=9.07s prompt_tokens=5821 output_tokens=38 total_tokens=6149 calls_last_minute=1
+2026-10-09 16:31:04 [GEMINI] SENDING model=gemini-3.6-flash key=key1 session=165 attempt=1 history_messages=10
+2026-10-09 16:31:11 [GEMINI] model=gemini-3.6-flash key=key1 session=165 status=success latency=7.60s prompt_tokens=5867 output_tokens=123 total_tokens=6556 calls_last_minute=1
+2026-10-09 16:32:16 [GEMINI] SENDING model=gemini-3.6-flash key=key1 session=165 attempt=1 history_messages=12
+2026-10-09 16:32:23 [GEMINI] model=gemini-3.6-flash key=key1 session=165 status=success latency=6.46s prompt_tokens=6002 output_tokens=164 total_tokens=6377 calls_last_minute=1
+2026-10-09 16:32:55 [GEMINI] SENDING model=gemini-3.6-flash key=key1 session=165 attempt=1 history_messages=14
+2026-10-09 16:33:13 [GEMINI] model=gemini-3.6-flash key=key1 session=165 status=success latency=17.79s prompt_tokens=6171 output_tokens=30 total_tokens=6344 calls_last_minute=2
+2026-10-09 16:35:47 [GEMINI] SENDING model=gemini-3.6-flash key=key1 session=165 attempt=1 history_messages=16
+2026-10-09 16:35:51 [GEMINI] model=gemini-3.6-flash key=key1 session=165 status=model_busy latency=4.14s prompt_tokens=0 output_tokens=0 total_tokens=0 calls_last_minute=1 error='503 This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.'
+2026-10-09 16:35:51 [GEMINI] SENDING model=gemini-3.5-flash key=key1 session=165 attempt=2 history_messages=16
+2026-10-09 16:35:58 [GEMINI] model=gemini-3.5-flash key=key1 session=165 status=success latency=7.13s prompt_tokens=6214 output_tokens=88 total_tokens=6716 calls_last_minute=2
+2026-10-09 16:35:58 [GEMINI] FALLBACK used model=gemini-3.5-flash key=key1 after 2 attempts
+2026-10-10 15:03:21 [GEMINI] SENDING model=gemini-3.6-flash key=key1 session=166 attempt=1 history_messages=0
+2026-10-10 15:03:42 [GEMINI] model=gemini-3.6-flash key=key1 session=166 status=success latency=20.70s prompt_tokens=5257 output_tokens=109 total_tokens=5715 calls_last_minute=1
+2026-10-10 15:04:07 [GEMINI] SENDING model=gemini-3.6-flash key=key1 session=166 attempt=1 history_messages=2
+2026-10-10 15:04:14 [GEMINI] model=gemini-3.6-flash key=key1 session=166 status=success latency=7.09s prompt_tokens=5374 output_tokens=79 total_tokens=6012 calls_last_minute=2
+2026-10-10 15:04:58 [GEMINI] SENDING model=gemini-3.6-flash key=key1 session=166 attempt=1 history_messages=4
+2026-10-10 15:05:07 [GEMINI] model=gemini-3.6-flash key=key1 session=166 status=success latency=9.54s prompt_tokens=5469 output_tokens=90 total_tokens=6082 calls_last_minute=1
+2026-10-10 15:48:21 [GEMINI] SENDING model=gemini-3.6-flash key=key1 session=167 attempt=1 history_messages=0
+2026-10-10 15:48:27 [GEMINI] model=gemini-3.6-flash key=key1 session=167 status=success latency=6.36s prompt_tokens=5258 output_tokens=58 total_tokens=5912 calls_last_minute=1
+2026-10-10 15:49:08 [GEMINI] SENDING model=gemini-3.6-flash key=key1 session=167 attempt=1 history_messages=2
+2026-10-10 15:49:17 [GEMINI] model=gemini-3.6-flash key=key1 session=167 status=success latency=8.10s prompt_tokens=5331 output_tokens=50 total_tokens=5674 calls_last_minute=2
+2026-10-12 11:50:23 [GEMINI] SENDING model=gemini-3.6-flash key=key1 session=167 attempt=1 history_messages=4
+2026-10-12 11:50:32 [GEMINI] model=gemini-3.6-flash key=key1 session=167 status=model_busy latency=9.27s prompt_tokens=0 output_tokens=0 total_tokens=0 calls_last_minute=1 error='503 This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.'
+2026-10-12 11:50:32 [GEMINI] SENDING model=gemini-3.5-flash key=key1 session=167 attempt=2 history_messages=4
+2026-10-12 11:50:35 [GEMINI] model=gemini-3.5-flash key=key1 session=167 status=model_busy latency=3.54s prompt_tokens=0 output_tokens=0 total_tokens=0 calls_last_minute=2 error='503 This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.'
+2026-10-12 11:50:35 [GEMINI] SENDING model=gemini-3.7-flash key=key1 session=167 attempt=3 history_messages=4
+2026-10-12 11:50:39 [GEMINI] model=gemini-3.7-flash key=key1 session=167 status=model_busy latency=3.16s prompt_tokens=0 output_tokens=0 total_tokens=0 calls_last_minute=3 error='503 This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.'
+2026-10-12 11:50:39 [GEMINI] SENDING model=gemini-3.8-flash key=key1 session=167 attempt=4 history_messages=4
+2026-10-12 11:50:42 [GEMINI] model=gemini-3.8-flash key=key1 session=167 status=model_busy latency=3.39s prompt_tokens=0 output_tokens=0 total_tokens=0 calls_last_minute=4 error='503 This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.'
+2026-10-12 11:50:42 [GEMINI] SENDING model=gemini-2.5-flash key=key1 session=167 attempt=5 history_messages=4
+2026-10-12 11:50:43 [GEMINI] model=gemini-2.5-flash key=key1 session=167 status=model_not_found latency=0.57s prompt_tokens=0 output_tokens=0 total_tokens=0 calls_last_minute=5 error='404 This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.8-flash for the latest features and improvements. We recommend you to use the Interactions API (https://ai.google.dev/gemini-api/docs/get-started).'

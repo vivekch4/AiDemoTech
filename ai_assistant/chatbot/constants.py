@@ -1,8 +1,30 @@
 import os
 import base64
+from pathlib import Path
 
+from dotenv import load_dotenv
 
-API_KEY = 'AIzaSyAeoQPXbbT6esWoLyCfGyjCXGQWRWAFHHA'
+# Load API keys from ai_assistant/.env (next to manage.py)
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+
+# One key per Google Cloud project. Each project has its own quota, so when one key
+# hits "quota exceeded" (429) the next key is tried. Set them in the .env file.
+# Empty keys are ignored.
+API_KEYS = [k for k in [
+    os.getenv("GEMINI_API_KEY_1", "").strip(),   # project 1
+    os.getenv("GEMINI_API_KEY_2", "").strip(),   # project 2
+    os.getenv("GEMINI_API_KEY_3", "").strip(),   # project 3
+] if k]
+
+# Tried in this order. When a model is overloaded ("high demand", 503) the next one is used.
+MODEL_FALLBACKS = [
+    "gemini-3.6-flash",
+    "gemini-3.5-flash",
+    "gemini-3.7-flash",
+    "gemini-3.8-flash",
+    "gemini-2.5-flash",
+]
+MODEL_NAME = MODEL_FALLBACKS[0]           # tried first
 
 SYSTEM_PROMPT = """
 You are an expert troubleshooter for industrial machinery with deep knowledge of electrical, mechanical, and control systems.
